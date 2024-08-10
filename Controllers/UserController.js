@@ -37,7 +37,8 @@ export function GetFollowersByUid(request, response) {
     response.status(200).json({
       ok: true,
       data: {
-        jsonResponse,
+        followers: { jsonResponse },
+        lenght: jsonResponse.length,
       },
     });
   } catch (error) {
