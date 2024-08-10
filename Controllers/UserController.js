@@ -24,6 +24,7 @@ export function GetUserByUserName(request, response) {
       data: {
         uid: user.uid,
         Name: user.nombre,
+        Email: user.email,
         userName: user.userName,
         CreatedAt: user.CreatedAt,
         LastLogIn: user.LastLogIn,
@@ -62,6 +63,7 @@ export function GetUserByEmail(request, response) {
       data: {
         uid: user.uid,
         Name: user.nombre,
+        Email: user.email,
         userName: user.userName,
         CreatedAt: user.CreatedAt,
         LastLogIn: user.LastLogIn,
@@ -78,18 +80,19 @@ export function GetUserByEmail(request, response) {
   }
 }
 
-export const createUser = (req, res) => {
-  const {
-    nombre,
-    userName,
-    email,
-    passWord,
-    descripción,
-    foto,
-    Activo,
-    FechaCreación,
-    ÚltimaFechaInicioSesion,
-  } = req.body;
+export function CreateUser(request, response) {
+  const result = validationResult(request);
+  if (!result.isEmpty()) {
+    response.status(400).json({
+      ok: false,
+      message: "Request don't pass validations.",
+      errorDescription: result.array(),
+    });
+
+    return;
+  }
+
+  const { Name, UserName, Email, PassWord, Description, Photo } = req.body;
 
   /***  if (!nombre || !userName || !email || !passWord || !FechaCreación) {
     return res
@@ -120,7 +123,7 @@ export const createUser = (req, res) => {
   Users.push(newUser);
 
   res.status(201).json(newUser);
-};
+}
 
 export const updateUser = (req, res) => {
   try {
