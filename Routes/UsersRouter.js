@@ -32,8 +32,4 @@ userRouter.patch('/UpdateUser', ValidateUpdateUserRequest(), UpdateUser);
 userRouter.get('/GetFollowers', ValidateUID(), GetFollowersByUid);
 userRouter.get('/GetFollowedUsers', ValidateUID(), GetFollowedUsersByUid);
 userRouter.post('/FollowUser', ValidateFollowerUIDAndFollowedUID(), FollowUser);
-userRouter.delete(
-  '/UnfollowUser',
-  ValidateFollowerUIDAndFollowedUID(),
-  Unfollow
-);
+userRouter.post('/UnfollowUser', ValidateFollowerUIDAndFollowedUID(), Unfollow);
