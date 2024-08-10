@@ -40,6 +40,27 @@ This is a copy of X
 
 ### Users related
 
+- (GET) /GetUserByUserName
+  > This Endpoint allows you to get a user by name
+- (GET) /GetUserByEmail
+  > This Endpoint allows you to get a user by email
+- (POST) /CreateUser
+  > This Endpoint allows you to create a user
+- (PATCH) /DeleteUser
+  > This Endpoint allows you to ONLY update the deleted propery
+- (PATCH) /RestoreUser
+  > This Endpoint allows you to ONLY update the deleted propery
+- (PATCH) /UpdateUser
+  > This Endpoint allows you to update the a user
+- (GET) /GetFollowers
+  > This Endpoint allows you to get followers by UID
+- (GET) /GetFollowedUsers
+  > This Endpoint allows you to get followed users by UID
+- (POST) /FollowUser
+  > This Endpoint allows you to follow a users
+- (POST) /UnfollowUser
+  > This Endpoint allows you to UNfollow a users
+
 ### Post related
 
 - (GET) /posts
