@@ -31,6 +31,7 @@ export function GetUserByUserName(request, response) {
         LastLogIn: user.LastLogIn,
         isActive: user.isActive,
         photo: user.photo,
+        deleted: user.deleted,
       },
     });
   } catch (error) {
@@ -70,6 +71,7 @@ export function GetUserByEmail(request, response) {
         LastLogIn: user.LastLogIn,
         isActive: user.isActive,
         photo: user.photo,
+        deleted: user.deleted,
       },
     });
   } catch (error) {
@@ -123,6 +125,76 @@ export function CreateUser(request, response) {
     response.status(500).json({
       ok: false,
       message: "An error ocurred while trying to create a user",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function DeleteUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid } = request.body;
+    const userIndex = Users.findIndex((User) => User.uid === uid);
+    if (userIndex === -1) throw new Error(`User with UID: ${uid} not found.`);
+
+    Users[userIndex] = {
+      ...Users[userIndex],
+      deleted: true,
+    };
+
+    response.status(500).json({
+      ok: true,
+      message: "User deleted successfully.",
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to delete user",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function RestoreUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid } = request.body;
+    const userIndex = Users.findIndex((User) => User.uid === uid);
+    if (userIndex === -1) throw new Error(`User with UID: ${uid} not found.`);
+
+    Users[userIndex] = {
+      ...Users[userIndex],
+      deleted: false,
+    };
+
+    response.status(500).json({
+      ok: true,
+      message: "User retored successfully.",
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to restore user",
       errorDescription: error?.message,
     });
   }
