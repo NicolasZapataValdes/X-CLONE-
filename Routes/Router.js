@@ -8,6 +8,7 @@ import {
   LogOutWithUserNameAndPassWord,
   GetUserByUserName,
   GetUserByEmail,
+  CreateUser,
 } from "../Controllers/index.js";
 
 import {
@@ -15,6 +16,7 @@ import {
   ValidateUserNameAndPassWord,
   ValidateUserName,
   ValidateEmail,
+  ValidateCreateUserRequest,
 } from "../Validators/index.js";
 
 router.post(
@@ -40,3 +42,4 @@ router.post(
 
 router.get("/GetUserByUserName", ValidateUserName(), GetUserByUserName);
 router.get("/GetUserByEmail", ValidateEmail(), GetUserByEmail);
+router.post("/CreateUser", ValidateCreateUserRequest(), CreateUser);
