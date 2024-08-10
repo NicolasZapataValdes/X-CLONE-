@@ -16,6 +16,13 @@ export function ValidateUID() {
   return [body("uid").notEmpty().withMessage("Param uid is empty.")];
 }
 
+export function ValidateFollowerUIDAndFollowedUID() {
+  return [
+    body("followerUid").notEmpty().withMessage("Param followerUid is empty."),
+    body("followedUid").notEmpty().withMessage("Param followerUid is empty."),
+  ];
+}
+
 export function ValidateCreateUserRequest() {
   return [
     body("Name").notEmpty().withMessage("Param Name is empty."),
