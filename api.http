@@ -1,0 +1,18 @@
+### GET ALL POST
+GET http://localhost:1234/api/v1/posts
+
+### GET POST BY ID
+GET http://localhost:1234/api/v1/posts/elemento456
+
+### CREATE (POST) A POST
+POST http://localhost:1234/api/v1/posts
+Content-Type: application/json
+
+{
+    "createdAt": "2024-10-05T18:15:08Z",
+    "creatorUID": "user456",
+    "updatedAt": "2024-10-05T18:15:08Z",
+    "eliminado": true,
+    "contenido": "Lo cree",
+}
+ 
