@@ -1,1 +1,2 @@
-export * from "./Router.js";
+export * from './Router.js';
+export * from './postRouter.js';
