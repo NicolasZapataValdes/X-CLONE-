@@ -39,3 +39,13 @@ export function ValidateCreateUserRequest() {
     body("Photo").notEmpty().withMessage("Param Photo is empty."),
   ];
 }
+
+export function ValidateUpdateUserRequest() {
+  return [
+    body("uid").notEmpty().withMessage("Param uid is empty."),
+    body("Name").notEmpty().withMessage("Param Name is empty."),
+    body("PassWord").notEmpty().withMessage("Param PassWord is empty."),
+    body("Description").notEmpty().withMessage("Param Description is empty."),
+    body("Photo").notEmpty().withMessage("Param Photo is empty."),
+  ];
+}

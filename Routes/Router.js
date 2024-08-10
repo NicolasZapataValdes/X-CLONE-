@@ -11,6 +11,7 @@ import {
   CreateUser,
   DeleteUser,
   RestoreUser,
+  UpdateUser,
 } from "../Controllers/index.js";
 
 import {
@@ -20,6 +21,7 @@ import {
   ValidateEmail,
   ValidateCreateUserRequest,
   ValidateUID,
+  ValidateUpdateUserRequest,
 } from "../Validators/index.js";
 
 router.post(
@@ -48,3 +50,4 @@ router.get("/GetUserByEmail", ValidateEmail(), GetUserByEmail);
 router.post("/CreateUser", ValidateCreateUserRequest(), CreateUser);
 router.patch("/DeleteUser", ValidateUID(), DeleteUser);
 router.patch("/RestoreUser", ValidateUID(), RestoreUser);
+router.patch("/UpdateUser", ValidateUpdateUserRequest(), UpdateUser);

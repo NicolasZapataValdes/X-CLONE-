@@ -130,6 +130,48 @@ export function CreateUser(request, response) {
   }
 }
 
+export function UpdateUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid, Name, PassWord, Description, Photo } = request.body;
+    const userIndex = Users.findIndex((User) => User.uid === uid);
+
+    if (userIndex === -1) throw new Error("User not found");
+
+    Users[userIndex] = {
+      ...Users[userIndex],
+      name: Name,
+      PassWord: PassWord,
+      descripción: Description,
+      photo: Photo,
+    };
+
+    response.status(201).json({
+      ok: true,
+      message: "User updated successfully.",
+      data: {
+        uid,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to update user",
+      errorDescription: error?.message,
+    });
+  }
+}
+
 export function DeleteUser(request, response) {
   try {
     const result = validationResult(request);
