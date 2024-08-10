@@ -3,6 +3,43 @@ import { validationResult } from "express-validator";
 import { getParsedCurrentDateTime } from "../Utils/index.js";
 import crypto from "node:crypto";
 
+export function FollowUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { followerUid, followedUid } = request.body;
+
+    const userIndex = Users.findIndex((U) => U.uid === followerUid);
+    if (userIndex === -1) throw new Error("User not found.");
+
+    const followedUserIndex = Users.findIndex((U) => U.uid === followedUid);
+    if (followedUserIndex === -1) throw new Error("Followed User not found.");
+
+    Users[userIndex].followed.push(followedUid);
+    Users[followedUserIndex].followers.push(followerUid);
+
+    response.status(200).json({
+      ok: true,
+      message: "User followed successfully.",
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to follow user",
+      errorDescription: error?.message,
+    });
+  }
+}
+
 export function GetFollowersByUid(request, response) {
   try {
     const result = validationResult(request);
