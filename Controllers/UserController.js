@@ -62,3 +62,29 @@ export const createUser = (req, res) => {
 
   res.status(201).json(newUser);
 };
+
+export const updateUser = (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const userIndex = Users.findIndex((user) => user.uid === id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ Message: "User not found" });
+    }
+
+    const updatedUser = {
+      ...Users[userIndex],
+      ...req.body,
+    };
+
+    Users[userIndex] = updatedUser;
+
+    res.status(201).json({
+      ok: true,
+      message: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ Message: "Internal server error" });
+  }
+};
