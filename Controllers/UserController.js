@@ -23,7 +23,7 @@ export function GetUserByUserName(request, response) {
       ok: true,
       data: {
         uid: user.uid,
-        Name: user.nombre,
+        Name: user.name,
         Email: user.email,
         userName: user.userName,
         CreatedAt: user.CreatedAt,
@@ -62,7 +62,7 @@ export function GetUserByEmail(request, response) {
       ok: true,
       data: {
         uid: user.uid,
-        Name: user.nombre,
+        Name: user.name,
         Email: user.email,
         userName: user.userName,
         CreatedAt: user.CreatedAt,
@@ -94,21 +94,9 @@ export function CreateUser(request, response) {
 
   const { Name, UserName, Email, PassWord, Description, Photo } = req.body;
 
-  /***  if (!nombre || !userName || !email || !passWord || !FechaCreación) {
-    return res
-      .status(400)
-      .send(
-        "Debe proporcionar nombre, userName, email, passWord, y FechaCreación."
-      );
-  }*/
-
-  const existingUser = Users.find((u) => u.email === email);
-  if (existingUser) {
-    return res.status(409).send("El usuario ya existe.");
-  }
-
   const newUser = {
     uid: crypto.randomUUID(),
+    Nombre,
     nombre,
     userName,
     email,
