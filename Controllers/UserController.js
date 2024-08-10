@@ -1,10 +1,10 @@
-import { Users } from '../constants/UsersData';
+import { Users } from "../constants/index.js";
 
 export const getUser = (req, res) => {
   const { nombre, email } = req.query;
 
   if (!nombre && !email) {
-    return res.status(400).send('Debe proporcionar un nombre o un email.');
+    return res.status(400).send("Debe proporcionar un nombre o un email.");
   }
 
   const user = Users.find(
@@ -12,7 +12,7 @@ export const getUser = (req, res) => {
   );
 
   if (!user) {
-    return res.status(404).send('Usuario no encontrado.');
+    return res.status(404).send("Usuario no encontrado.");
   }
 
   res.json(user);
