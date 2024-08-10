@@ -1,5 +1,6 @@
 import express from "express";
 export const router = express.Router();
+
 import {
   LogInWithEmailAndPassWord,
   LogInWithUserNameAndPassWord,
@@ -7,7 +8,28 @@ import {
   LogOutWithUserNameAndPassWord,
 } from "../Controllers/index.js";
 
-router.post("/LogInWithEmailAndPassWord", LogInWithEmailAndPassWord);
-router.post("/LogInWithUserNameAndPassWord", LogInWithUserNameAndPassWord);
-router.post("/LogOutWithEmailAndPassWord", LogOutWithEmailAndPassWord);
-router.post("/LogOutWithUserNameAndPassWord", LogOutWithUserNameAndPassWord);
+import {
+  ValidateEmailAndPassWord,
+  ValidateUserNameAndPassWord,
+} from "../Validators/index.js";
+
+router.post(
+  "/LogInWithEmailAndPassWord",
+  ValidateEmailAndPassWord(),
+  LogInWithEmailAndPassWord
+);
+router.post(
+  "/LogInWithUserNameAndPassWord",
+  ValidateUserNameAndPassWord(),
+  LogInWithUserNameAndPassWord
+);
+router.post(
+  "/LogOutWithEmailAndPassWord",
+  ValidateEmailAndPassWord(),
+  LogOutWithEmailAndPassWord
+);
+router.post(
+  "/LogOutWithUserNameAndPassWord",
+  ValidateUserNameAndPassWord(),
+  LogOutWithUserNameAndPassWord
+);
