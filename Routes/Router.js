@@ -6,15 +6,15 @@ import {
   LogInWithUserNameAndPassWord,
   LogOutWithEmailAndPassWord,
   LogOutWithUserNameAndPassWord,
-  createUser,
-  updateUser,
-  getUserByUserName,
+  GetUserByUserName,
+  GetUserByEmail,
 } from "../Controllers/index.js";
 
 import {
   ValidateEmailAndPassWord,
   ValidateUserNameAndPassWord,
-  validateUserName,
+  ValidateUserName,
+  ValidateEmail,
 } from "../Validators/index.js";
 
 router.post(
@@ -38,6 +38,5 @@ router.post(
   LogOutWithUserNameAndPassWord
 );
 
-router.get("/GetUserByUserName", validateUserName(), getUserByUserName);
-router.post("/createUser", createUser);
-router.patch("/updateUser/:id", updateUser);
+router.get("/GetUserByUserName", ValidateUserName(), GetUserByUserName);
+router.get("/GetUserByEmail", ValidateEmail(), GetUserByEmail);

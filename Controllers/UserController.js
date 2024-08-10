@@ -2,7 +2,7 @@ import { Users } from "../constants/index.js";
 import { validationResult } from "express-validator";
 import crypto from "node:crypto";
 
-export const getUserByUserName = (request, response) => {
+export function GetUserByUserName(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -20,13 +20,16 @@ export const getUserByUserName = (request, response) => {
     if (!user) throw new Error("User not found.");
 
     response.status(200).json({
-      uid: user.uid,
-      Name: user.nombre,
-      userName: user.userName,
-      CreatedAt: user.CreatedAt,
-      LastLogIn: user.LastLogIn,
-      isActive: user.isActive,
-      photo: user.photo,
+      ok: true,
+      data: {
+        uid: user.uid,
+        Name: user.nombre,
+        userName: user.userName,
+        CreatedAt: user.CreatedAt,
+        LastLogIn: user.LastLogIn,
+        isActive: user.isActive,
+        photo: user.photo,
+      },
     });
   } catch (error) {
     response.status(500).json({
@@ -35,25 +38,45 @@ export const getUserByUserName = (request, response) => {
       errorDescription: error?.message,
     });
   }
-};
+}
 
-export const getUser = (req, res) => {
-  const { nombre, email } = req.query;
+export function GetUserByEmail(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
 
-  /** if (!nombre && !email) {
-    return res.status(400).send("Debe proporcionar un nombre o un email.");
-  }*/
+      return;
+    }
 
-  /**const user = Users.find(
-    (u) => (nombre && u.nombre === nombre) || (email && u.email === email)
-  );
+    const { Email } = request.body;
+    const user = Users.find((user) => user.email === Email);
+    if (!user) throw new Error("User not found.");
 
-  if (!user) {
-    return res.status(404).send("Usuario no encontrado.");
-  }*/
-
-  res.json(Users);
-};
+    response.status(200).json({
+      ok: true,
+      data: {
+        uid: user.uid,
+        Name: user.nombre,
+        userName: user.userName,
+        CreatedAt: user.CreatedAt,
+        LastLogIn: user.LastLogIn,
+        isActive: user.isActive,
+        photo: user.photo,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get user by Email",
+      errorDescription: error?.message,
+    });
+  }
+}
 
 export const createUser = (req, res) => {
   const {
