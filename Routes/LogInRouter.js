@@ -1,14 +1,11 @@
 import express from "express";
-export const router = express.Router();
+export const logInRouter = express.Router();
 
 import {
   LogInWithEmailAndPassWord,
   LogInWithUserNameAndPassWord,
   LogOutWithEmailAndPassWord,
   LogOutWithUserNameAndPassWord,
-  getUser,
-  createUser,
-  updateUser,
 } from "../Controllers/index.js";
 
 import {
@@ -16,27 +13,23 @@ import {
   ValidateUserNameAndPassWord,
 } from "../Validators/index.js";
 
-router.post(
+logInRouter.post(
   "/LogInWithEmailAndPassWord",
   ValidateEmailAndPassWord(),
   LogInWithEmailAndPassWord
 );
-router.post(
+logInRouter.post(
   "/LogInWithUserNameAndPassWord",
   ValidateUserNameAndPassWord(),
   LogInWithUserNameAndPassWord
 );
-router.post(
+logInRouter.post(
   "/LogOutWithEmailAndPassWord",
   ValidateEmailAndPassWord(),
   LogOutWithEmailAndPassWord
 );
-router.post(
+logInRouter.post(
   "/LogOutWithUserNameAndPassWord",
   ValidateUserNameAndPassWord(),
   LogOutWithUserNameAndPassWord
 );
-
-router.get("/getUser", getUser);
-router.post("/createUser", createUser);
-router.patch("/updateUser/:id", updateUser);

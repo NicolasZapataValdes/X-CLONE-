@@ -1,67 +1,246 @@
 import { Users } from "../constants/index.js";
+import { validationResult } from "express-validator";
+import { getParsedCurrentDateTime } from "../Utils/index.js";
 import crypto from "node:crypto";
 
-export const getUser = (req, res) => {
-  const { nombre, email } = req.query;
+export function GetUserByUserName(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
 
-  /** if (!nombre && !email) {
-    return res.status(400).send("Debe proporcionar un nombre o un email.");
-  }*/
+      return;
+    }
 
-  /**const user = Users.find(
-    (u) => (nombre && u.nombre === nombre) || (email && u.email === email)
-  );
+    const { UserName } = request.body;
+    const user = Users.find((user) => user.userName === UserName);
+    if (!user) throw new Error("User not found.");
 
-  if (!user) {
-    return res.status(404).send("Usuario no encontrado.");
-  }*/
-
-  res.json(Users);
-};
-
-export const createUser = (req, res) => {
-  const {
-    nombre,
-    userName,
-    email,
-    passWord,
-    descripción,
-    foto,
-    Activo,
-    FechaCreación,
-    ÚltimaFechaInicioSesion,
-  } = req.body;
-
-  /***  if (!nombre || !userName || !email || !passWord || !FechaCreación) {
-    return res
-      .status(400)
-      .send(
-        "Debe proporcionar nombre, userName, email, passWord, y FechaCreación."
-      );
-  }*/
-
-  const existingUser = Users.find((u) => u.email === email);
-  if (existingUser) {
-    return res.status(409).send("El usuario ya existe.");
+    response.status(200).json({
+      ok: true,
+      data: {
+        uid: user.uid,
+        Name: user.name,
+        Email: user.email,
+        userName: user.userName,
+        CreatedAt: user.CreatedAt,
+        LastLogIn: user.LastLogIn,
+        isActive: user.isActive,
+        photo: user.photo,
+        deleted: user.deleted,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get user by UserName",
+      errorDescription: error?.message,
+    });
   }
+}
 
-  const newUser = {
-    uid: crypto.randomUUID(),
-    nombre,
-    userName,
-    email,
-    passWord,
-    "Fecha de Creación": FechaCreación,
-    "Último fecha de inicio de sesión": ÚltimaFechaInicioSesion || null,
-    Activo: Activo !== undefined ? Activo : true,
-    descripción: descripción || "",
-    foto: foto || "",
-  };
+export function GetUserByEmail(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
 
-  Users.push(newUser);
+      return;
+    }
 
-  res.status(201).json(newUser);
-};
+    const { Email } = request.body;
+    const user = Users.find((user) => user.email === Email);
+    if (!user) throw new Error("User not found.");
+
+    response.status(200).json({
+      ok: true,
+      data: {
+        uid: user.uid,
+        Name: user.name,
+        Email: user.email,
+        userName: user.userName,
+        CreatedAt: user.CreatedAt,
+        LastLogIn: user.LastLogIn,
+        isActive: user.isActive,
+        photo: user.photo,
+        deleted: user.deleted,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get user by Email",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function CreateUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { Name, UserName, Email, PassWord, Description, Photo } =
+      request.body;
+
+    const newUser = {
+      uid: crypto.randomUUID(),
+      name: Name,
+      userName: UserName,
+      email: Email,
+      PassWord: PassWord,
+      CreatedAt: getParsedCurrentDateTime(),
+      LastLogIn: getParsedCurrentDateTime(),
+      isActive: true,
+      descripción: Description,
+      photo: Photo,
+      deleted: false,
+    };
+
+    Users.push(newUser);
+    response.status(201).json({
+      ok: true,
+      message: "User created successfully.",
+      data: {
+        uid: newUser.uid,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to create a user",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function UpdateUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid, Name, PassWord, Description, Photo } = request.body;
+    const userIndex = Users.findIndex((User) => User.uid === uid);
+
+    if (userIndex === -1) throw new Error("User not found");
+
+    Users[userIndex] = {
+      ...Users[userIndex],
+      name: Name,
+      PassWord: PassWord,
+      descripción: Description,
+      photo: Photo,
+    };
+
+    response.status(201).json({
+      ok: true,
+      message: "User updated successfully.",
+      data: {
+        uid,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to update user",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function DeleteUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid } = request.body;
+    const userIndex = Users.findIndex((User) => User.uid === uid);
+    if (userIndex === -1) throw new Error(`User with UID: ${uid} not found.`);
+
+    Users[userIndex] = {
+      ...Users[userIndex],
+      deleted: true,
+    };
+
+    response.status(500).json({
+      ok: true,
+      message: "User deleted successfully.",
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to delete user",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function RestoreUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid } = request.body;
+    const userIndex = Users.findIndex((User) => User.uid === uid);
+    if (userIndex === -1) throw new Error(`User with UID: ${uid} not found.`);
+
+    Users[userIndex] = {
+      ...Users[userIndex],
+      deleted: false,
+    };
+
+    response.status(500).json({
+      ok: true,
+      message: "User retored successfully.",
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to restore user",
+      errorDescription: error?.message,
+    });
+  }
+}
 
 export const updateUser = (req, res) => {
   try {
