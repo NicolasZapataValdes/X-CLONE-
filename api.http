@@ -2,25 +2,41 @@
 GET http://localhost:1234/api/v1/posts
 
 ### GET POST BY ID
-GET http://localhost:1234/api/v1/posts/elemento456
+GET http://localhost:1234/api/v1/posts/elemento345
 
 ### CREATE (POST) A POST
 POST http://localhost:1234/api/v1/posts
 Content-Type: application/json
 
 {
-    "createdAt": "2024-10-05T18:15:08Z",
+    "createdAt": "10/10/2024",
     "creatorUID": "user456",
-    "updatedAt": "2024-10-05T18:15:08Z",
-    "eliminado": true,
-    "contenido": "Lo cree"
+    "updatedAt": "08/10/2024",
+    "deleted": true,
+    "content": "Lo cree"
 }
 
-### UPDATE (PATCH) A POST
+### UPDATE (PATCH) A POST CONTENT
 PATCH http://localhost:1234/api/v1/posts/elemento345
 Content-Type: application/json
 
 {
-    "eliminado": true
+    "content": "Lo cree"
 }
- 
+
+
+### UPDATE (PATCH) A POST DELETED FIELD
+PATCH http://localhost:1234/api/v1/posts/delete/elemento345
+Content-Type: application/json
+
+{
+    "deleted": true
+}
+
+### RESTORE (PATCH) A POST DELETED FIELD
+PATCH http://localhost:1234/api/v1/posts/restore/elemento345
+Content-Type: application/json
+
+{
+    "deleted": false
+}
