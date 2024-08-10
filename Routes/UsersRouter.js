@@ -16,6 +16,7 @@ import {
   DeleteUser,
   RestoreUser,
   UpdateUser,
+  GetFollowersByUid,
 } from "../Controllers/index.js";
 
 userRouter.get("/GetUserByUserName", ValidateUserName(), GetUserByUserName);
@@ -24,3 +25,4 @@ userRouter.post("/CreateUser", ValidateCreateUserRequest(), CreateUser);
 userRouter.patch("/DeleteUser", ValidateUID(), DeleteUser);
 userRouter.patch("/RestoreUser", ValidateUID(), RestoreUser);
 userRouter.patch("/UpdateUser", ValidateUpdateUserRequest(), UpdateUser);
+userRouter.get("/GetFollowers", ValidateUID(), GetFollowersByUid);

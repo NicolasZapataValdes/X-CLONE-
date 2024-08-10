@@ -11,7 +11,7 @@ export const Users = [
     descripción: "Usuario registrado desde el inicio.",
     photo: "https://example.com/user123.jpg",
     deleted: false,
-    followers: [],
+    followers: ["user456", "user789"],
     followed: [],
   },
   {
