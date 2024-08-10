@@ -11,6 +11,8 @@ export const Users = [
     descripción: "Usuario registrado desde el inicio.",
     photo: "https://example.com/user123.jpg",
     deleted: false,
+    followers: [],
+    followed: [],
   },
   {
     uid: "user456",
@@ -24,6 +26,8 @@ export const Users = [
     descripción: "Nuevo usuario.",
     photo: "",
     deleted: false,
+    followers: [],
+    followed: [],
   },
   {
     uid: "user789",
@@ -37,6 +41,8 @@ export const Users = [
     descripción: "Usuario inisActive.",
     photo: "https://example.com/user789.png",
     deleted: false,
+    followers: [],
+    followed: [],
   },
   {
     uid: "user012",
@@ -50,6 +56,8 @@ export const Users = [
     descripción: "Usuario nuevo, aún no ha iniciado sesión.",
     photo: "",
     deleted: false,
+    followers: [],
+    followed: [],
   },
   {
     uid: "user345",
@@ -63,5 +71,7 @@ export const Users = [
     descripción: "Usuario frecuente.",
     photo: "https://example.com/user345.jpg",
     deleted: false,
+    followers: [],
+    followed: [],
   },
 ];
