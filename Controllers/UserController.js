@@ -1,5 +1,6 @@
 import { Users } from "../constants/index.js";
 import { validationResult } from "express-validator";
+import { getParsedCurrentDateTime } from "../Utils/index.js";
 import crypto from "node:crypto";
 
 export function GetUserByUserName(request, response) {
@@ -81,36 +82,50 @@ export function GetUserByEmail(request, response) {
 }
 
 export function CreateUser(request, response) {
-  const result = validationResult(request);
-  if (!result.isEmpty()) {
-    response.status(400).json({
-      ok: false,
-      message: "Request don't pass validations.",
-      errorDescription: result.array(),
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { Name, UserName, Email, PassWord, Description, Photo } =
+      request.body;
+
+    const newUser = {
+      uid: crypto.randomUUID(),
+      name: Name,
+      userName: UserName,
+      email: Email,
+      PassWord: PassWord,
+      CreatedAt: getParsedCurrentDateTime(),
+      LastLogIn: getParsedCurrentDateTime(),
+      isActive: true,
+      descripción: Description,
+      photo: Photo,
+      deleted: false,
+    };
+
+    Users.push(newUser);
+    response.status(201).json({
+      ok: true,
+      message: "User created successfully.",
+      data: {
+        uid: newUser.uid,
+      },
     });
-
-    return;
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to create a user",
+      errorDescription: error?.message,
+    });
   }
-
-  const { Name, UserName, Email, PassWord, Description, Photo } = req.body;
-
-  const newUser = {
-    uid: crypto.randomUUID(),
-    Nombre,
-    nombre,
-    userName,
-    email,
-    passWord,
-    "Fecha de Creación": FechaCreación,
-    "Último fecha de inicio de sesión": ÚltimaFechaInicioSesion || null,
-    Activo: Activo !== undefined ? Activo : true,
-    descripción: descripción || "",
-    foto: foto || "",
-  };
-
-  Users.push(newUser);
-
-  res.status(201).json(newUser);
 }
 
 export const updateUser = (req, res) => {
