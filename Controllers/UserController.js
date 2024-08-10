@@ -2,6 +2,197 @@ import { Users } from "../constants/index.js";
 import { validationResult } from "express-validator";
 import { getParsedCurrentDateTime } from "../Utils/index.js";
 import crypto from "node:crypto";
+import { log } from "node:console";
+
+export const Unfollow = (request, response) => {
+  try {
+    const result = validationResult(request);
+
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { followerUid, followedUid } = request.body;
+
+    console.log("follower");
+    console.log(followerUid);
+
+    console.log("Seguido");
+    console.log(followedUid);
+
+    const followerIndex = Users.findIndex((U) => U.uid === followerUid);
+    if (followerIndex === -1) throw new Error("Follower user not found.");
+
+    const followedIndex = Users.findIndex((U) => U.uid === followedUid);
+    if (followedIndex === -1) throw new Error("Followed user not found.");
+
+    let newFollowerList = [];
+    let newFollowedList = [];
+
+    Users[followerIndex].followed.forEach((f) => {
+      if (f !== followedUid) {
+        newFollowedList.push(f);
+      }
+    });
+
+    Users[followedIndex].followers.forEach((f) => {
+      if (f !== followerUid) {
+        newFollowerList.push(f);
+      }
+    });
+
+    Users[followerIndex].followed = newFollowedList;
+    Users[followedIndex].followers = newFollowerList;
+
+    response.status(200).json({
+      ok: true,
+      message: "User unfollowed successfully",
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followers",
+      errorDescription: error?.message,
+    });
+  }
+};
+
+export function FollowUser(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { followerUid, followedUid } = request.body;
+
+    const userIndex = Users.findIndex((U) => U.uid === followerUid);
+    if (userIndex === -1) throw new Error("User not found.");
+
+    const followedUserIndex = Users.findIndex((U) => U.uid === followedUid);
+    if (followedUserIndex === -1) throw new Error("Followed User not found.");
+
+    Users[userIndex].followed.push(followedUid);
+    Users[followedUserIndex].followers.push(followerUid);
+
+    response.status(200).json({
+      ok: true,
+      message: "User followed successfully.",
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to follow user",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function GetFollowersByUid(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid } = request.body;
+    const userIndex = Users.findIndex((U) => U.uid === uid);
+    if (userIndex === -1) throw new Error("User not found.");
+
+    let jsonResponse = [];
+    Users[userIndex].followers.forEach((follower) => {
+      const followerIndex = Users.findIndex((U) => U.uid === follower);
+
+      if (!(followerIndex === -1)) {
+        jsonResponse.push({
+          uid: Users[followerIndex].uid,
+          name: Users[followerIndex].name,
+          userName: Users[followerIndex].userName,
+          photo: Users[followerIndex].photo,
+        });
+      }
+    });
+
+    response.status(200).json({
+      ok: true,
+      data: {
+        followers: jsonResponse,
+        lenght: jsonResponse.length,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followers",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function GetFollowedUsersByUid(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid } = request.body;
+    const userIndex = Users.findIndex((U) => U.uid === uid);
+    if (userIndex === -1) throw new Error("User not found.");
+
+    let jsonResponse = [];
+    Users[userIndex].followed.forEach((follower) => {
+      const followerIndex = Users.findIndex((U) => U.uid === follower);
+
+      if (!(followerIndex === -1)) {
+        jsonResponse.push({
+          uid: Users[followerIndex].uid,
+          name: Users[followerIndex].name,
+          userName: Users[followerIndex].userName,
+          photo: Users[followerIndex].photo,
+        });
+      }
+    });
+
+    response.status(200).json({
+      ok: true,
+      data: {
+        followers: jsonResponse,
+        lenght: jsonResponse.length,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followed users",
+      errorDescription: error?.message,
+    });
+  }
+}
 
 export function GetUserByUserName(request, response) {
   try {
