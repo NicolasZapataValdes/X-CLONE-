@@ -1,9 +1,7 @@
 import express from 'express';
-import { router } from './Routes/index.js';
+import { router, postRouter } from './Routes/index.js';
 
 export const app = express();
-
-import { postRouter } from './Controllers/index.js';
 
 app.use(express.json());
 
