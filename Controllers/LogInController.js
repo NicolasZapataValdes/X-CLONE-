@@ -17,7 +17,7 @@ export function LogInWithEmailAndPassWord(request, response) {
       message: "User logged In succesfully",
     });
   } catch (error) {
-    response.json({
+    response.status(500).json({
       ok: false,
       message: "Error while trying to LogIn With Email and Password",
       errorDescription: error,
@@ -68,7 +68,7 @@ export function LogOutWithEmailAndPassWord(request, response) {
       message: "User logged Out succesfully",
     });
   } catch (error) {
-    response.json({
+    response.status(500).json({
       ok: false,
       message: "Error while trying to Log Out With Email and Password",
       errorDescription: error,
