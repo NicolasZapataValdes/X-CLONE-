@@ -1,5 +1,41 @@
 import { Users } from "../constants/index.js";
+import { validationResult } from "express-validator";
 import crypto from "node:crypto";
+
+export const getUserByUserName = (request, response) => {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { UserName } = request.body;
+    const user = Users.find((user) => user.userName === UserName);
+    if (!user) throw new Error("User not found.");
+
+    response.status(200).json({
+      uid: user.uid,
+      Name: user.nombre,
+      userName: user.userName,
+      CreatedAt: user.CreatedAt,
+      LastLogIn: user.LastLogIn,
+      isActive: user.isActive,
+      photo: user.photo,
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get user by UserName",
+      errorDescription: error?.message,
+    });
+  }
+};
 
 export const getUser = (req, res) => {
   const { nombre, email } = req.query;
