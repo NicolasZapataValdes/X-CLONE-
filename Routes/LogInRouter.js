@@ -1,53 +1,35 @@
 import express from "express";
-export const router = express.Router();
+export const logInRouter = express.Router();
 
 import {
   LogInWithEmailAndPassWord,
   LogInWithUserNameAndPassWord,
   LogOutWithEmailAndPassWord,
   LogOutWithUserNameAndPassWord,
-  GetUserByUserName,
-  GetUserByEmail,
-  CreateUser,
-  DeleteUser,
-  RestoreUser,
-  UpdateUser,
 } from "../Controllers/index.js";
 
 import {
   ValidateEmailAndPassWord,
   ValidateUserNameAndPassWord,
-  ValidateUserName,
-  ValidateEmail,
-  ValidateCreateUserRequest,
-  ValidateUID,
-  ValidateUpdateUserRequest,
 } from "../Validators/index.js";
 
-router.post(
+logInRouter.post(
   "/LogInWithEmailAndPassWord",
   ValidateEmailAndPassWord(),
   LogInWithEmailAndPassWord
 );
-router.post(
+logInRouter.post(
   "/LogInWithUserNameAndPassWord",
   ValidateUserNameAndPassWord(),
   LogInWithUserNameAndPassWord
 );
-router.post(
+logInRouter.post(
   "/LogOutWithEmailAndPassWord",
   ValidateEmailAndPassWord(),
   LogOutWithEmailAndPassWord
 );
-router.post(
+logInRouter.post(
   "/LogOutWithUserNameAndPassWord",
   ValidateUserNameAndPassWord(),
   LogOutWithUserNameAndPassWord
 );
-
-router.get("/GetUserByUserName", ValidateUserName(), GetUserByUserName);
-router.get("/GetUserByEmail", ValidateEmail(), GetUserByEmail);
-router.post("/CreateUser", ValidateCreateUserRequest(), CreateUser);
-router.patch("/DeleteUser", ValidateUID(), DeleteUser);
-router.patch("/RestoreUser", ValidateUID(), RestoreUser);
-router.patch("/UpdateUser", ValidateUpdateUserRequest(), UpdateUser);
