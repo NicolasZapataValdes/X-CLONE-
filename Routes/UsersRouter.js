@@ -7,6 +7,7 @@ import {
   ValidateCreateUserRequest,
   ValidateUID,
   ValidateUpdateUserRequest,
+  ValidateFollowerUIDAndFollowedUID,
 } from "../Validators/index.js";
 
 import {
@@ -18,6 +19,7 @@ import {
   UpdateUser,
   GetFollowersByUid,
   GetFollowedUsersByUid,
+  FollowUser,
 } from "../Controllers/index.js";
 
 userRouter.get("/GetUserByUserName", ValidateUserName(), GetUserByUserName);
@@ -28,3 +30,4 @@ userRouter.patch("/RestoreUser", ValidateUID(), RestoreUser);
 userRouter.patch("/UpdateUser", ValidateUpdateUserRequest(), UpdateUser);
 userRouter.get("/GetFollowers", ValidateUID(), GetFollowersByUid);
 userRouter.get("/GetFollowedUsers", ValidateUID(), GetFollowedUsersByUid);
+userRouter.post("/FollowUser", ValidateFollowerUIDAndFollowedUID(), FollowUser);
