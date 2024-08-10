@@ -37,14 +37,61 @@ export function GetFollowersByUid(request, response) {
     response.status(200).json({
       ok: true,
       data: {
-        followers: { jsonResponse },
+        followers: jsonResponse,
         lenght: jsonResponse.length,
       },
     });
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: "An error ocurred while trying to get user by UserName",
+      message: "An error ocurred while trying to get followers",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export function GetFollowedUsersByUid(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { uid } = request.body;
+    const userIndex = Users.findIndex((U) => U.uid === uid);
+    if (userIndex === -1) throw new Error("User not found.");
+
+    let jsonResponse = [];
+    Users[userIndex].followed.forEach((follower) => {
+      const followerIndex = Users.findIndex((U) => U.uid === follower);
+
+      if (!(followerIndex === -1)) {
+        jsonResponse.push({
+          uid: Users[followerIndex].uid,
+          name: Users[followerIndex].name,
+          userName: Users[followerIndex].userName,
+          photo: Users[followerIndex].photo,
+        });
+      }
+    });
+
+    response.status(200).json({
+      ok: true,
+      data: {
+        followers: jsonResponse,
+        lenght: jsonResponse.length,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followed users",
       errorDescription: error?.message,
     });
   }

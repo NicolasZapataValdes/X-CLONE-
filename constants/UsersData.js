@@ -12,7 +12,7 @@ export const Users = [
     photo: "https://example.com/user123.jpg",
     deleted: false,
     followers: ["user456", "user789"],
-    followed: [],
+    followed: ["user345"],
   },
   {
     uid: "user456",
