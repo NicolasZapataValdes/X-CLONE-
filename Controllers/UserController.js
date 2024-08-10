@@ -1,11 +1,13 @@
-import { Users } from '../constants/index.js';
-import { validationResult } from 'express-validator';
-import { getParsedCurrentDateTime } from '../Utils/index.js';
-import crypto from 'node:crypto';
+import { Users } from "../constants/index.js";
+import { validationResult } from "express-validator";
+import { getParsedCurrentDateTime } from "../Utils/index.js";
+import crypto from "node:crypto";
+import { log } from "node:console";
 
-export const Unfollow = (req, res) => {
+export const Unfollow = (request, response) => {
   try {
-    const result = validationResult(req);
+    const result = validationResult(request);
+
     if (!result.isEmpty()) {
       response.status(400).json({
         ok: false,
@@ -16,13 +18,19 @@ export const Unfollow = (req, res) => {
       return;
     }
 
-    const { followerUid, followedUid } = req.body;
+    const { followerUid, followedUid } = request.body;
+
+    console.log("follower");
+    console.log(followerUid);
+
+    console.log("Seguido");
+    console.log(followedUid);
 
     const followerIndex = Users.findIndex((U) => U.uid === followerUid);
-    if (followerIndex === -1) throw new Error('Follower user not found.');
+    if (followerIndex === -1) throw new Error("Follower user not found.");
 
-    const followedIndex = Users.findIndex((U) => U.uid === followedIndex);
-    if (followedIndex === -1) throw new Error('Followed user not found.');
+    const followedIndex = Users.findIndex((U) => U.uid === followedUid);
+    if (followedIndex === -1) throw new Error("Followed user not found.");
 
     let newFollowerList = [];
     let newFollowedList = [];
@@ -44,12 +52,12 @@ export const Unfollow = (req, res) => {
 
     response.status(200).json({
       ok: true,
-      message: 'User unfollowed successfully',
+      message: "User unfollowed successfully",
     });
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to get followers',
+      message: "An error ocurred while trying to get followers",
       errorDescription: error?.message,
     });
   }
@@ -107,7 +115,7 @@ export function GetFollowersByUid(request, response) {
 
     const { uid } = request.body;
     const userIndex = Users.findIndex((U) => U.uid === uid);
-    if (userIndex === -1) throw new Error('User not found.');
+    if (userIndex === -1) throw new Error("User not found.");
 
     let jsonResponse = [];
     Users[userIndex].followers.forEach((follower) => {
@@ -133,7 +141,7 @@ export function GetFollowersByUid(request, response) {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to get followers',
+      message: "An error ocurred while trying to get followers",
       errorDescription: error?.message,
     });
   }
@@ -154,7 +162,7 @@ export function GetFollowedUsersByUid(request, response) {
 
     const { uid } = request.body;
     const userIndex = Users.findIndex((U) => U.uid === uid);
-    if (userIndex === -1) throw new Error('User not found.');
+    if (userIndex === -1) throw new Error("User not found.");
 
     let jsonResponse = [];
     Users[userIndex].followed.forEach((follower) => {
@@ -180,7 +188,7 @@ export function GetFollowedUsersByUid(request, response) {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to get followed users',
+      message: "An error ocurred while trying to get followed users",
       errorDescription: error?.message,
     });
   }
@@ -201,7 +209,7 @@ export function GetUserByUserName(request, response) {
 
     const { UserName } = request.body;
     const user = Users.find((user) => user.userName === UserName);
-    if (!user) throw new Error('User not found.');
+    if (!user) throw new Error("User not found.");
 
     response.status(200).json({
       ok: true,
@@ -220,7 +228,7 @@ export function GetUserByUserName(request, response) {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to get user by UserName',
+      message: "An error ocurred while trying to get user by UserName",
       errorDescription: error?.message,
     });
   }
@@ -241,7 +249,7 @@ export function GetUserByEmail(request, response) {
 
     const { Email } = request.body;
     const user = Users.find((user) => user.email === Email);
-    if (!user) throw new Error('User not found.');
+    if (!user) throw new Error("User not found.");
 
     response.status(200).json({
       ok: true,
@@ -260,7 +268,7 @@ export function GetUserByEmail(request, response) {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to get user by Email',
+      message: "An error ocurred while trying to get user by Email",
       errorDescription: error?.message,
     });
   }
@@ -299,7 +307,7 @@ export function CreateUser(request, response) {
     Users.push(newUser);
     response.status(201).json({
       ok: true,
-      message: 'User created successfully.',
+      message: "User created successfully.",
       data: {
         uid: newUser.uid,
       },
@@ -307,7 +315,7 @@ export function CreateUser(request, response) {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to create a user',
+      message: "An error ocurred while trying to create a user",
       errorDescription: error?.message,
     });
   }
@@ -329,7 +337,7 @@ export function UpdateUser(request, response) {
     const { uid, Name, PassWord, Description, Photo } = request.body;
     const userIndex = Users.findIndex((User) => User.uid === uid);
 
-    if (userIndex === -1) throw new Error('User not found');
+    if (userIndex === -1) throw new Error("User not found");
 
     Users[userIndex] = {
       ...Users[userIndex],
@@ -341,7 +349,7 @@ export function UpdateUser(request, response) {
 
     response.status(201).json({
       ok: true,
-      message: 'User updated successfully.',
+      message: "User updated successfully.",
       data: {
         uid,
       },
@@ -349,7 +357,7 @@ export function UpdateUser(request, response) {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to update user',
+      message: "An error ocurred while trying to update user",
       errorDescription: error?.message,
     });
   }
@@ -379,12 +387,12 @@ export function DeleteUser(request, response) {
 
     response.status(500).json({
       ok: true,
-      message: 'User deleted successfully.',
+      message: "User deleted successfully.",
     });
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to delete user',
+      message: "An error ocurred while trying to delete user",
       errorDescription: error?.message,
     });
   }
@@ -414,12 +422,12 @@ export function RestoreUser(request, response) {
 
     response.status(500).json({
       ok: true,
-      message: 'User retored successfully.',
+      message: "User retored successfully.",
     });
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to restore user',
+      message: "An error ocurred while trying to restore user",
       errorDescription: error?.message,
     });
   }
@@ -432,7 +440,7 @@ export const updateUser = (req, res) => {
     const userIndex = Users.findIndex((user) => user.uid === id);
 
     if (userIndex === -1) {
-      return res.status(404).json({ Message: 'User not found' });
+      return res.status(404).json({ Message: "User not found" });
     }
 
     const updatedUser = {
@@ -447,6 +455,6 @@ export const updateUser = (req, res) => {
       message: updatedUser,
     });
   } catch (error) {
-    res.status(500).json({ Message: 'Internal server error' });
+    res.status(500).json({ Message: "Internal server error" });
   }
 };
