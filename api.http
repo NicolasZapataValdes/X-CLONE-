@@ -13,6 +13,14 @@ Content-Type: application/json
     "creatorUID": "user456",
     "updatedAt": "2024-10-05T18:15:08Z",
     "eliminado": true,
-    "contenido": "Lo cree",
+    "contenido": "Lo cree"
+}
+
+### UPDATE (PATCH) A POST
+PATCH http://localhost:1234/api/v1/posts/elemento345
+Content-Type: application/json
+
+{
+    "eliminado": true
 }
  
