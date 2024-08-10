@@ -2,7 +2,7 @@ export const Users = [
   {
     uid: "user123",
     name: "Juan Pérez",
-    username: "jperez",
+    userName: "jperez",
     email: "jperez@example.com",
     passWord: "25d55ad283aa40cr2b059e2b7760fa3e566d86fe", // Ejemplo de hash SHA1
     CreatedAt: "2023-11-24T10:25:32Z",
@@ -15,7 +15,7 @@ export const Users = [
   {
     uid: "user456",
     name: "Ana García",
-    username: "agarcia",
+    userName: "agarcia",
     email: "agarcia@example.com",
     passWord: "a827edc132271d29f6932e333681314e563e8788",
     CreatedAt: "2023-12-05T13:15:08Z",
@@ -28,7 +28,7 @@ export const Users = [
   {
     uid: "user789",
     name: "Carlos López",
-    username: "clopez",
+    userName: "clopez",
     email: "clopez@example.com",
     passWord: "c4ca4238a0b923820dcc509a6f75849b",
     CreatedAt: "2023-12-10T16:30:22Z",
@@ -41,7 +41,7 @@ export const Users = [
   {
     uid: "user012",
     name: "María Rodríguez",
-    username: "mrodriguez",
+    userName: "mrodriguez",
     email: "mrodriguez@example.com",
     passWord: "e10adc3949ba59abbe56e057f20f883e",
     CreatedAt: "2024-01-02T09:45:17Z",
@@ -54,7 +54,7 @@ export const Users = [
   {
     uid: "user345",
     name: "Pedro Martínez",
-    username: "pmartinez",
+    userName: "pmartinez",
     email: "pmartinez@example.com",
     passWord: "d8578edf8458ce06fbc567aec4b4aee5",
     CreatedAt: "2024-01-05T14:20:36Z",
