@@ -20,12 +20,6 @@ export const Unfollow = (request, response) => {
 
     const { followerUid, followedUid } = request.body;
 
-    console.log("follower");
-    console.log(followerUid);
-
-    console.log("Seguido");
-    console.log(followedUid);
-
     const followerIndex = Users.findIndex((U) => U.uid === followerUid);
     if (followerIndex === -1) throw new Error("Follower user not found.");
 

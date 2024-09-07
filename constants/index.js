@@ -1,2 +1,2 @@
 export * from "./UsersData.js";
-export * from "./PostsData.js";
+export * from "../Posts/Constants/PostsData.js";

@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { Posts } from "../constants/index.js";
+import { Posts } from "../../constants/index.js";
 import { validationResult } from "express-validator";
 
 export const getAllPosts = (req, res) => {
