@@ -1,5 +1,5 @@
 import { body } from "express-validator";
-import { Users } from "../constants/index.js";
+import { Users } from "../../constants/index.js";
 
 export function ValidateUserName() {
   return [body("UserName").notEmpty().withMessage("Param UserName is empty.")];
