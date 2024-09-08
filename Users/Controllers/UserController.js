@@ -3,7 +3,7 @@ import { validationResult } from "express-validator";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
 import { UserModel } from "../Models/index.js";
 
-export function Unfollow(request, response) {
+export async function Unfollow(request, response) {
   try {
     const result = validationResult(request);
 
@@ -19,29 +19,25 @@ export function Unfollow(request, response) {
 
     const { followerUid, followedUid } = request.body;
 
-    const followerIndex = Users.findIndex((U) => U.uid === followerUid);
-    if (followerIndex === -1) throw new Error("Follower user not found.");
-
-    const followedIndex = Users.findIndex((U) => U.uid === followedUid);
-    if (followedIndex === -1) throw new Error("Followed user not found.");
-
-    let newFollowerList = [];
-    let newFollowedList = [];
-
-    Users[followerIndex].followed.forEach((f) => {
-      if (f !== followedUid) {
-        newFollowedList.push(f);
+    const followerQueryResult = await UserModel.updateOne(
+      { _id: followerUid },
+      {
+        $pull: { followed: followedUid },
       }
-    });
+    );
 
-    Users[followedIndex].followers.forEach((f) => {
-      if (f !== followerUid) {
-        newFollowerList.push(f);
+    if (followerQueryResult.matchedCount === 0)
+      throw new Error("Follower not found.");
+
+    const followedQueryResult = await UserModel.updateOne(
+      { _id: followedUid },
+      {
+        $pull: { followers: followerUid },
       }
-    });
+    );
 
-    Users[followerIndex].followed = newFollowedList;
-    Users[followedIndex].followers = newFollowerList;
+    if (followedQueryResult.matchedCount === 0)
+      throw new Error("Followed not found.");
 
     response.status(200).json({
       ok: true,
