@@ -1,4 +1,4 @@
-import { Users } from "../constants/index.js";
+import { Users } from "../../Users/Constants/index.js";
 import { validationResult } from "express-validator";
 
 export function LogInWithEmailAndPassWord(request, response) {

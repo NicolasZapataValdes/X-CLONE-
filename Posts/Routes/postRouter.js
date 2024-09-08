@@ -8,14 +8,14 @@ import {
   updatePostContent,
   deletePostById,
   restorePostById,
-} from "../../Controllers/index.js";
+} from "../Controllers/index.js";
 
 import {
   validatePost,
   validateUpdatePostContent,
   validateDeletePostById,
   validateRestorePostById,
-} from "../../Validators/index.js";
+} from "../Validators/index.js";
 
 postRouter.get("/posts", getAllPosts);
 // postRouter.get('/posts/:id', validateGetPostById(), getPostById);

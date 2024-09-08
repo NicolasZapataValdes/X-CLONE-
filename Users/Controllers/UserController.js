@@ -1,8 +1,7 @@
 import { Users } from "../constants/index.js";
 import { validationResult } from "express-validator";
-import { getParsedCurrentDateTime } from "../Utils/index.js";
+import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
 import crypto from "node:crypto";
-import { log } from "node:console";
 
 export const Unfollow = (request, response) => {
   try {

@@ -8,7 +8,7 @@ import {
   ValidateUID,
   ValidateUpdateUserRequest,
   ValidateFollowerUIDAndFollowedUID,
-} from "../../Validators/index.js";
+} from "../Validators/index.js";
 
 import {
   GetUserByUserName,
@@ -21,7 +21,7 @@ import {
   GetFollowedUsersByUid,
   FollowUser,
   Unfollow,
-} from "../../Controllers/index.js";
+} from "../Controllers/index.js";
 
 userRouter.get("/GetUserByUserName", ValidateUserName(), GetUserByUserName);
 userRouter.get("/GetUserByEmail", ValidateEmail(), GetUserByEmail);

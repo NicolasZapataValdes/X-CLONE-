@@ -6,12 +6,12 @@ import {
   LogInWithUserNameAndPassWord,
   LogOutWithEmailAndPassWord,
   LogOutWithUserNameAndPassWord,
-} from "../../Controllers/index.js";
+} from "../Controller/index.js";
 
 import {
   ValidateEmailAndPassWord,
   ValidateUserNameAndPassWord,
-} from "../../Validators/index.js";
+} from "../Validator/index.js";
 
 logInRouter.post(
   "/LogInWithEmailAndPassWord",
