@@ -353,7 +353,7 @@ export function UpdateUser(request, response) {
   }
 }
 
-export function DeleteUser(request, response) {
+export async function DeleteUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -367,15 +367,15 @@ export function DeleteUser(request, response) {
     }
 
     const { uid } = request.body;
-    const userIndex = Users.findIndex((User) => User.uid === uid);
-    if (userIndex === -1) throw new Error(`User with UID: ${uid} not found.`);
+    const queryResult = await UserModel.updateOne(
+      { _id: uid },
+      { deleted: true }
+    );
 
-    Users[userIndex] = {
-      ...Users[userIndex],
-      deleted: true,
-    };
+    if (queryResult.acknowledged === 0)
+      throw new Error("Not exists an user with uid given.");
 
-    response.status(500).json({
+    response.status(200).json({
       ok: true,
       message: "User deleted successfully.",
     });
@@ -388,7 +388,7 @@ export function DeleteUser(request, response) {
   }
 }
 
-export function RestoreUser(request, response) {
+export async function RestoreUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -402,15 +402,16 @@ export function RestoreUser(request, response) {
     }
 
     const { uid } = request.body;
-    const userIndex = Users.findIndex((User) => User.uid === uid);
-    if (userIndex === -1) throw new Error(`User with UID: ${uid} not found.`);
 
-    Users[userIndex] = {
-      ...Users[userIndex],
-      deleted: false,
-    };
+    const queryResult = await UserModel.updateOne(
+      { _id: uid },
+      { deleted: false }
+    );
 
-    response.status(500).json({
+    if (queryResult.acknowledged === 0)
+      throw new Error("Not exists an user with uid given.");
+
+    response.status(200).json({
       ok: true,
       message: "User retored successfully.",
     });
