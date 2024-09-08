@@ -1,16 +1,25 @@
-import crypto from "node:crypto";
-import { Posts } from "../constants/index.js";
 import { validationResult } from "express-validator";
+import { PostModel } from "../Models/index.js";
+import { getParsedCurrentDateTime } from "../../Utils/Functions/Functions.js";
 
-export const getAllPosts = (req, res) => {
+export async function getAllPosts(req, res) {
   try {
-    res.json(Posts);
-  } catch (error) {
-    res.status(500).json({ Message: "Internal server error" });
-  }
-};
+    const queryResult = await PostModel.find().limit(10).exec();
 
-export const getPostById = (req, res) => {
+    res.status(200).json({
+      ok: true,
+      posts: queryResult,
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get posts",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export async function getPostById(req, res) {
   try {
     const result = validationResult(req);
 
@@ -23,27 +32,26 @@ export const getPostById = (req, res) => {
     }
 
     const { id } = req.params;
+    const post = await PostModel.findById(id).exec();
 
-    const post = Posts.find((p) => p.uid == id);
-
-    if (!post) {
-      return res.status(404).json({ Message: "Post not found" });
+    if (!post || post.length === 0) {
+      return res.status(404).json({ ok: false, message: "Post not found" });
     }
 
-    res.json({
+    res.status(200).json({
       ok: true,
-      message: post,
+      post,
     });
   } catch (error) {
-    response.status(500).json({
+    res.status(500).json({
       ok: false,
       message: "An error ocurred while trying to get post by uid",
       errorDescription: error?.message,
     });
   }
-};
+}
 
-export const createPost = (req, res) => {
+export async function createPost(req, res) {
   try {
     const result = validationResult(req);
 
@@ -55,16 +63,19 @@ export const createPost = (req, res) => {
       });
     }
 
-    const newPost = {
-      uid: crypto.randomUUID(),
-      ...req.body,
-    };
+    const { createdAt, creatorUID, updatedAt, deleted, content } = req.body;
+    const newPost = new PostModel({
+      content: content,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      creatorUID: creatorUID,
+      deleted: deleted,
+    });
 
-    Posts.push(newPost);
-
+    await newPost.save();
     res.status(201).json({
       ok: true,
-      data: newPost,
+      message: "Post created successfully",
     });
   } catch (error) {
     response.status(500).json({
@@ -73,9 +84,9 @@ export const createPost = (req, res) => {
       errorDescription: error?.message,
     });
   }
-};
+}
 
-export const updatePostContent = (req, res) => {
+export async function updatePostContent(req, res) {
   try {
     const result = validationResult(req);
 
@@ -88,23 +99,23 @@ export const updatePostContent = (req, res) => {
     }
 
     const { id } = req.params;
+    const { content } = req.body;
 
-    const postIndex = Posts.findIndex((p) => p.uid == id);
+    const queryResult = await PostModel.updateOne(
+      { _id: id },
+      {
+        content: content,
+        updatedAt: getParsedCurrentDateTime(),
+      }
+    ).exec();
 
-    if (postIndex === -1) {
-      return res.status(404).json({ Message: "Post not found" });
+    if (queryResult.matchedCount === 0) {
+      return res.status(404).json({ ok: false, message: "Post not found." });
     }
 
-    const updatedPost = {
-      ...Posts[postIndex],
-      ...req.body,
-    };
-
-    Posts[postIndex] = updatedPost;
-
-    res.status(201).json({
+    res.status(200).json({
       ok: true,
-      message: updatedPost,
+      message: "Post updated successfully",
     });
   } catch (error) {
     response.status(500).json({
@@ -113,9 +124,9 @@ export const updatePostContent = (req, res) => {
       errorDescription: error?.message,
     });
   }
-};
+}
 
-export const deletePostById = (req, res) => {
+export async function deletePostById(req, res) {
   try {
     const result = validationResult(req);
 
@@ -129,22 +140,18 @@ export const deletePostById = (req, res) => {
 
     const { id } = req.params;
 
-    const postIndex = Posts.findIndex((p) => p.uid == id);
+    const queryResult = await PostModel.updateOne(
+      { _id: id },
+      { deleted: true }
+    ).exec();
 
-    if (postIndex === -1) {
-      return res.status(404).json({ Message: "Post not found" });
+    if (queryResult.matchedCount === 0) {
+      return res.status(404).json({ ok: false, Message: "Post not found" });
     }
 
-    const updatedPost = {
-      ...Posts[postIndex],
-      ...req.body,
-    };
-
-    Posts[postIndex] = updatedPost;
-
-    res.status(201).json({
+    res.status(200).json({
       ok: true,
-      message: updatedPost,
+      message: "Post deleted successfully",
     });
   } catch (error) {
     response.status(500).json({
@@ -153,9 +160,9 @@ export const deletePostById = (req, res) => {
       errorDescription: error?.message,
     });
   }
-};
+}
 
-export const restorePostById = (req, res) => {
+export async function restorePostById(req, res) {
   try {
     const result = validationResult(req);
 
@@ -169,22 +176,18 @@ export const restorePostById = (req, res) => {
 
     const { id } = req.params;
 
-    const postIndex = Posts.findIndex((p) => p.uid == id);
+    const queryResult = await PostModel.updateOne(
+      { _id: id },
+      { deleted: false }
+    ).exec();
 
-    if (postIndex === -1) {
-      return res.status(404).json({ Message: "Post not found" });
+    if (queryResult.matchedCount === 0) {
+      return res.status(404).json({ ok: false, Message: "Post not found" });
     }
-
-    const updatedPost = {
-      ...Posts[postIndex],
-      ...req.body,
-    };
-
-    Posts[postIndex] = updatedPost;
 
     res.status(201).json({
       ok: true,
-      message: updatedPost,
+      message: "Post restored successfully",
     });
   } catch (error) {
     response.status(500).json({
@@ -193,4 +196,4 @@ export const restorePostById = (req, res) => {
       errorDescription: error?.message,
     });
   }
-};
+}
