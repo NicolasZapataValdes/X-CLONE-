@@ -1,9 +1,10 @@
 import { Users } from "../constants/index.js";
 import { validationResult } from "express-validator";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
+import { UserModel } from "../Models/index.js";
 import crypto from "node:crypto";
 
-export const Unfollow = (request, response) => {
+export function Unfollow(request, response) {
   try {
     const result = validationResult(request);
 
@@ -54,7 +55,7 @@ export const Unfollow = (request, response) => {
       errorDescription: error?.message,
     });
   }
-};
+}
 
 export function FollowUser(request, response) {
   try {
@@ -267,7 +268,7 @@ export function GetUserByEmail(request, response) {
   }
 }
 
-export function CreateUser(request, response) {
+export async function CreateUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -283,27 +284,23 @@ export function CreateUser(request, response) {
     const { Name, UserName, Email, PassWord, Description, Photo } =
       request.body;
 
-    const newUser = {
-      uid: crypto.randomUUID(),
+    const User = new UserModel({
       name: Name,
       userName: UserName,
       email: Email,
-      PassWord: PassWord,
+      passWord: PassWord,
       CreatedAt: getParsedCurrentDateTime(),
       LastLogIn: getParsedCurrentDateTime(),
       isActive: true,
       descripción: Description,
       photo: Photo,
       deleted: false,
-    };
+    });
 
-    Users.push(newUser);
+    await User.save();
     response.status(201).json({
       ok: true,
       message: "User created successfully.",
-      data: {
-        uid: newUser.uid,
-      },
     });
   } catch (error) {
     response.status(500).json({
@@ -425,29 +422,3 @@ export function RestoreUser(request, response) {
     });
   }
 }
-
-export const updateUser = (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const userIndex = Users.findIndex((user) => user.uid === id);
-
-    if (userIndex === -1) {
-      return res.status(404).json({ Message: "User not found" });
-    }
-
-    const updatedUser = {
-      ...Users[userIndex],
-      ...req.body,
-    };
-
-    Users[userIndex] = updatedUser;
-
-    res.status(201).json({
-      ok: true,
-      message: updatedUser,
-    });
-  } catch (error) {
-    res.status(500).json({ Message: "Internal server error" });
-  }
-};
