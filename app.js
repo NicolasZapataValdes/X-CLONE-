@@ -9,6 +9,6 @@ export const app = express();
 app.use(express.json());
 ConnectToDataBase();
 
-// app.use("/api/v1", userRouter);
-// app.use("/api/v1", logInRouter);
-// app.use("/api/v1", postRouter);
+app.use("/api/v1", userRouter);
+app.use("/api/v1", logInRouter);
+app.use("/api/v1", postRouter);
