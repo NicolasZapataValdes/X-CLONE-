@@ -2,7 +2,6 @@ import { Users } from "../constants/index.js";
 import { validationResult } from "express-validator";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
 import { UserModel } from "../Models/index.js";
-import crypto from "node:crypto";
 
 export function Unfollow(request, response) {
   try {
@@ -188,7 +187,7 @@ export function GetFollowedUsersByUid(request, response) {
   }
 }
 
-export function GetUserByUserName(request, response) {
+export async function GetUserByUserName(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -202,21 +201,23 @@ export function GetUserByUserName(request, response) {
     }
 
     const { UserName } = request.body;
-    const user = Users.find((user) => user.userName === UserName);
-    if (!user) throw new Error("User not found.");
+    const user = await UserModel.find({ userName: UserName }).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
+
+    console.log(user);
 
     response.status(200).json({
       ok: true,
       data: {
-        uid: user.uid,
-        Name: user.name,
-        Email: user.email,
-        userName: user.userName,
-        CreatedAt: user.CreatedAt,
-        LastLogIn: user.LastLogIn,
-        isActive: user.isActive,
-        photo: user.photo,
-        deleted: user.deleted,
+        uid: user[0].id,
+        Name: user[0].name,
+        Email: user[0].email,
+        userName: user[0].userName,
+        CreatedAt: user[0].CreatedAt,
+        LastLogIn: user[0].LastLogIn,
+        isActive: user[0].isActive,
+        photo: user[0].photo,
+        deleted: user[0].deleted,
       },
     });
   } catch (error) {
@@ -228,7 +229,7 @@ export function GetUserByUserName(request, response) {
   }
 }
 
-export function GetUserByEmail(request, response) {
+export async function GetUserByEmail(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -242,21 +243,23 @@ export function GetUserByEmail(request, response) {
     }
 
     const { Email } = request.body;
-    const user = Users.find((user) => user.email === Email);
-    if (!user) throw new Error("User not found.");
+    const user = await UserModel.find({ email: Email }).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
+
+    console.log(user);
 
     response.status(200).json({
       ok: true,
       data: {
-        uid: user.uid,
-        Name: user.name,
-        Email: user.email,
-        userName: user.userName,
-        CreatedAt: user.CreatedAt,
-        LastLogIn: user.LastLogIn,
-        isActive: user.isActive,
-        photo: user.photo,
-        deleted: user.deleted,
+        uid: user[0].id,
+        Name: user[0].name,
+        Email: user[0].email,
+        userName: user[0].userName,
+        CreatedAt: user[0].CreatedAt,
+        LastLogIn: user[0].LastLogIn,
+        isActive: user[0].isActive,
+        photo: user[0].photo,
+        deleted: user[0].deleted,
       },
     });
   } catch (error) {
