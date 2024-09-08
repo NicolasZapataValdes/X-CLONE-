@@ -100,7 +100,7 @@ export async function FollowUser(request, response) {
   }
 }
 
-export function GetFollowersByUid(request, response) {
+export async function GetFollowersByUid(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -114,22 +114,20 @@ export function GetFollowersByUid(request, response) {
     }
 
     const { uid } = request.body;
-    const userIndex = Users.findIndex((U) => U.uid === uid);
-    if (userIndex === -1) throw new Error("User not found.");
 
-    let jsonResponse = [];
-    Users[userIndex].followers.forEach((follower) => {
-      const followerIndex = Users.findIndex((U) => U.uid === follower);
+    const user = await UserModel.find({ _id: uid }).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
 
-      if (!(followerIndex === -1)) {
-        jsonResponse.push({
-          uid: Users[followerIndex].uid,
-          name: Users[followerIndex].name,
-          userName: Users[followerIndex].userName,
-          photo: Users[followerIndex].photo,
-        });
-      }
+    const followerUsers = await UserModel.find({
+      _id: { $in: user[0].followers },
     });
+
+    const jsonResponse = followerUsers.map((U) => ({
+      uid: U._id,
+      name: U.name,
+      userName: U.userName,
+      photo: U.photo,
+    }));
 
     response.status(200).json({
       ok: true,
@@ -147,7 +145,7 @@ export function GetFollowersByUid(request, response) {
   }
 }
 
-export function GetFollowedUsersByUid(request, response) {
+export async function GetFollowedUsersByUid(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -161,27 +159,25 @@ export function GetFollowedUsersByUid(request, response) {
     }
 
     const { uid } = request.body;
-    const userIndex = Users.findIndex((U) => U.uid === uid);
-    if (userIndex === -1) throw new Error("User not found.");
 
-    let jsonResponse = [];
-    Users[userIndex].followed.forEach((follower) => {
-      const followerIndex = Users.findIndex((U) => U.uid === follower);
+    const user = await UserModel.find({ _id: uid }).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
 
-      if (!(followerIndex === -1)) {
-        jsonResponse.push({
-          uid: Users[followerIndex].uid,
-          name: Users[followerIndex].name,
-          userName: Users[followerIndex].userName,
-          photo: Users[followerIndex].photo,
-        });
-      }
+    const followedUsers = await UserModel.find({
+      _id: { $in: user[0].followed },
     });
+
+    const jsonResponse = followedUsers.map((U) => ({
+      uid: U._id,
+      name: U.name,
+      userName: U.userName,
+      photo: U.photo,
+    }));
 
     response.status(200).json({
       ok: true,
       data: {
-        followers: jsonResponse,
+        followed: jsonResponse,
         lenght: jsonResponse.length,
       },
     });
