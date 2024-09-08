@@ -1,4 +1,3 @@
-import { Users } from "../constants/index.js";
 import { validationResult } from "express-validator";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
 import { UserModel } from "../Models/index.js";
