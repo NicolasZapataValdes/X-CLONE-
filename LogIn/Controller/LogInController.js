@@ -1,7 +1,7 @@
-import { Users } from "../constants/index.js";
+import { UserModel } from "../../Users/Models/index.js";
 import { validationResult } from "express-validator";
 
-export function LogInWithEmailAndPassWord(request, response) {
+export async function LogInWithEmailAndPassWord(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -15,17 +15,12 @@ export function LogInWithEmailAndPassWord(request, response) {
     }
 
     const { email, passWord } = request.body;
+    const queryResult = await UserModel.updateOne(
+      { email: email, passWord: passWord },
+      { isActive: true }
+    ).exec();
 
-    const userIndex = Users.findIndex(
-      (User) => User.email === email && User.passWord == passWord
-    );
-
-    if (userIndex === -1) throw Error("User not found.");
-
-    Users[userIndex] = {
-      ...Users[userIndex],
-      Activo: true,
-    };
+    if (queryResult.matchedCount === 0) throw new Error("User not found.");
 
     response.json({
       ok: true,
@@ -40,7 +35,7 @@ export function LogInWithEmailAndPassWord(request, response) {
   }
 }
 
-export function LogInWithUserNameAndPassWord(request, response) {
+export async function LogInWithUserNameAndPassWord(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -55,16 +50,12 @@ export function LogInWithUserNameAndPassWord(request, response) {
 
     const { UserName, passWord } = request.body;
 
-    const userIndex = Users.findIndex(
-      (User) => User.userName === UserName && User.passWord == passWord
-    );
+    const queryResult = await UserModel.updateOne(
+      { userName: UserName, passWord: passWord },
+      { isActive: true }
+    ).exec();
 
-    if (userIndex === -1) throw new Error("User not found.");
-
-    Users[userIndex] = {
-      ...Users[userIndex],
-      Activo: true,
-    };
+    if (queryResult.matchedCount === 0) throw new Error("User not found.");
 
     response.json({
       ok: true,
@@ -79,7 +70,7 @@ export function LogInWithUserNameAndPassWord(request, response) {
   }
 }
 
-export function LogOutWithEmailAndPassWord(request, response) {
+export async function LogOutWithEmailAndPassWord(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -93,16 +84,12 @@ export function LogOutWithEmailAndPassWord(request, response) {
     }
     const { email, passWord } = request.body;
 
-    const userIndex = Users.findIndex(
-      (User) => User.email === email && User.passWord == passWord
-    );
+    const queryResult = await UserModel.updateOne(
+      { email: email, passWord: passWord },
+      { isActive: false }
+    ).exec();
 
-    if (userIndex === -1) throw Error("User not found.");
-
-    Users[userIndex] = {
-      ...Users[userIndex],
-      Activo: false,
-    };
+    if (queryResult.matchedCount === 0) throw new Error("User not found.");
 
     response.json({
       ok: true,
@@ -117,7 +104,7 @@ export function LogOutWithEmailAndPassWord(request, response) {
   }
 }
 
-export function LogOutWithUserNameAndPassWord(request, response) {
+export async function LogOutWithUserNameAndPassWord(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -132,17 +119,12 @@ export function LogOutWithUserNameAndPassWord(request, response) {
 
     const { UserName, passWord } = request.body;
 
-    const userIndex = Users.findIndex(
-      (User) => User.userName === UserName && User.passWord == passWord
-    );
+    const queryResult = await UserModel.updateOne(
+      { userName: UserName, passWord: passWord },
+      { isActive: false }
+    ).exec();
 
-    if (userIndex === -1) throw Error("User not found.");
-
-    Users[userIndex] = {
-      ...Users[userIndex],
-      Activo: false,
-    };
-
+    if (queryResult.matchedCount === 0) throw new Error("User not found.");
     response.json({
       ok: true,
       message: "User logged Out succesfully",

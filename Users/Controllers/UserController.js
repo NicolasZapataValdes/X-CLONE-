@@ -1,10 +1,8 @@
-import { Users } from "../constants/index.js";
 import { validationResult } from "express-validator";
-import { getParsedCurrentDateTime } from "../Utils/index.js";
-import crypto from "node:crypto";
-import { log } from "node:console";
+import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
+import { UserModel } from "../Models/index.js";
 
-export const Unfollow = (request, response) => {
+export async function Unfollow(request, response) {
   try {
     const result = validationResult(request);
 
@@ -20,35 +18,25 @@ export const Unfollow = (request, response) => {
 
     const { followerUid, followedUid } = request.body;
 
-    console.log("follower");
-    console.log(followerUid);
-
-    console.log("Seguido");
-    console.log(followedUid);
-
-    const followerIndex = Users.findIndex((U) => U.uid === followerUid);
-    if (followerIndex === -1) throw new Error("Follower user not found.");
-
-    const followedIndex = Users.findIndex((U) => U.uid === followedUid);
-    if (followedIndex === -1) throw new Error("Followed user not found.");
-
-    let newFollowerList = [];
-    let newFollowedList = [];
-
-    Users[followerIndex].followed.forEach((f) => {
-      if (f !== followedUid) {
-        newFollowedList.push(f);
+    const followerQueryResult = await UserModel.updateOne(
+      { _id: followerUid },
+      {
+        $pull: { followed: followedUid },
       }
-    });
+    );
 
-    Users[followedIndex].followers.forEach((f) => {
-      if (f !== followerUid) {
-        newFollowerList.push(f);
+    if (followerQueryResult.matchedCount === 0)
+      throw new Error("Follower not found.");
+
+    const followedQueryResult = await UserModel.updateOne(
+      { _id: followedUid },
+      {
+        $pull: { followers: followerUid },
       }
-    });
+    );
 
-    Users[followerIndex].followed = newFollowedList;
-    Users[followedIndex].followers = newFollowerList;
+    if (followedQueryResult.matchedCount === 0)
+      throw new Error("Followed not found.");
 
     response.status(200).json({
       ok: true,
@@ -61,9 +49,9 @@ export const Unfollow = (request, response) => {
       errorDescription: error?.message,
     });
   }
-};
+}
 
-export function FollowUser(request, response) {
+export async function FollowUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -78,14 +66,25 @@ export function FollowUser(request, response) {
 
     const { followerUid, followedUid } = request.body;
 
-    const userIndex = Users.findIndex((U) => U.uid === followerUid);
-    if (userIndex === -1) throw new Error("User not found.");
+    const followerQueryResult = await UserModel.updateOne(
+      { _id: followerUid },
+      {
+        $push: { followed: followedUid },
+      }
+    );
 
-    const followedUserIndex = Users.findIndex((U) => U.uid === followedUid);
-    if (followedUserIndex === -1) throw new Error("Followed User not found.");
+    if (followerQueryResult.matchedCount === 0)
+      throw new Error("Follower not found.");
 
-    Users[userIndex].followed.push(followedUid);
-    Users[followedUserIndex].followers.push(followerUid);
+    const followedQueryResult = await UserModel.updateOne(
+      { _id: followedUid },
+      {
+        $push: { followers: followerUid },
+      }
+    );
+
+    if (followedQueryResult.matchedCount === 0)
+      throw new Error("Followed not found.");
 
     response.status(200).json({
       ok: true,
@@ -100,7 +99,7 @@ export function FollowUser(request, response) {
   }
 }
 
-export function GetFollowersByUid(request, response) {
+export async function GetFollowersByUid(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -114,22 +113,20 @@ export function GetFollowersByUid(request, response) {
     }
 
     const { uid } = request.body;
-    const userIndex = Users.findIndex((U) => U.uid === uid);
-    if (userIndex === -1) throw new Error("User not found.");
 
-    let jsonResponse = [];
-    Users[userIndex].followers.forEach((follower) => {
-      const followerIndex = Users.findIndex((U) => U.uid === follower);
+    const user = await UserModel.find({ _id: uid }).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
 
-      if (!(followerIndex === -1)) {
-        jsonResponse.push({
-          uid: Users[followerIndex].uid,
-          name: Users[followerIndex].name,
-          userName: Users[followerIndex].userName,
-          photo: Users[followerIndex].photo,
-        });
-      }
+    const followerUsers = await UserModel.find({
+      _id: { $in: user[0].followers },
     });
+
+    const jsonResponse = followerUsers.map((U) => ({
+      uid: U._id,
+      name: U.name,
+      userName: U.userName,
+      photo: U.photo,
+    }));
 
     response.status(200).json({
       ok: true,
@@ -147,7 +144,7 @@ export function GetFollowersByUid(request, response) {
   }
 }
 
-export function GetFollowedUsersByUid(request, response) {
+export async function GetFollowedUsersByUid(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -161,27 +158,25 @@ export function GetFollowedUsersByUid(request, response) {
     }
 
     const { uid } = request.body;
-    const userIndex = Users.findIndex((U) => U.uid === uid);
-    if (userIndex === -1) throw new Error("User not found.");
 
-    let jsonResponse = [];
-    Users[userIndex].followed.forEach((follower) => {
-      const followerIndex = Users.findIndex((U) => U.uid === follower);
+    const user = await UserModel.find({ _id: uid }).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
 
-      if (!(followerIndex === -1)) {
-        jsonResponse.push({
-          uid: Users[followerIndex].uid,
-          name: Users[followerIndex].name,
-          userName: Users[followerIndex].userName,
-          photo: Users[followerIndex].photo,
-        });
-      }
+    const followedUsers = await UserModel.find({
+      _id: { $in: user[0].followed },
     });
+
+    const jsonResponse = followedUsers.map((U) => ({
+      uid: U._id,
+      name: U.name,
+      userName: U.userName,
+      photo: U.photo,
+    }));
 
     response.status(200).json({
       ok: true,
       data: {
-        followers: jsonResponse,
+        followed: jsonResponse,
         lenght: jsonResponse.length,
       },
     });
@@ -194,7 +189,7 @@ export function GetFollowedUsersByUid(request, response) {
   }
 }
 
-export function GetUserByUserName(request, response) {
+export async function GetUserByUserName(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -208,21 +203,21 @@ export function GetUserByUserName(request, response) {
     }
 
     const { UserName } = request.body;
-    const user = Users.find((user) => user.userName === UserName);
-    if (!user) throw new Error("User not found.");
+    const user = await UserModel.find({ userName: UserName }).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
 
     response.status(200).json({
       ok: true,
       data: {
-        uid: user.uid,
-        Name: user.name,
-        Email: user.email,
-        userName: user.userName,
-        CreatedAt: user.CreatedAt,
-        LastLogIn: user.LastLogIn,
-        isActive: user.isActive,
-        photo: user.photo,
-        deleted: user.deleted,
+        uid: user[0].id,
+        Name: user[0].name,
+        Email: user[0].email,
+        userName: user[0].userName,
+        CreatedAt: user[0].CreatedAt,
+        LastLogIn: user[0].LastLogIn,
+        isActive: user[0].isActive,
+        photo: user[0].photo,
+        deleted: user[0].deleted,
       },
     });
   } catch (error) {
@@ -234,7 +229,7 @@ export function GetUserByUserName(request, response) {
   }
 }
 
-export function GetUserByEmail(request, response) {
+export async function GetUserByEmail(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -248,21 +243,21 @@ export function GetUserByEmail(request, response) {
     }
 
     const { Email } = request.body;
-    const user = Users.find((user) => user.email === Email);
-    if (!user) throw new Error("User not found.");
+    const user = await UserModel.find({ email: Email }).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
 
     response.status(200).json({
       ok: true,
       data: {
-        uid: user.uid,
-        Name: user.name,
-        Email: user.email,
-        userName: user.userName,
-        CreatedAt: user.CreatedAt,
-        LastLogIn: user.LastLogIn,
-        isActive: user.isActive,
-        photo: user.photo,
-        deleted: user.deleted,
+        uid: user[0].id,
+        Name: user[0].name,
+        Email: user[0].email,
+        userName: user[0].userName,
+        CreatedAt: user[0].CreatedAt,
+        LastLogIn: user[0].LastLogIn,
+        isActive: user[0].isActive,
+        photo: user[0].photo,
+        deleted: user[0].deleted,
       },
     });
   } catch (error) {
@@ -274,7 +269,7 @@ export function GetUserByEmail(request, response) {
   }
 }
 
-export function CreateUser(request, response) {
+export async function CreateUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -290,27 +285,23 @@ export function CreateUser(request, response) {
     const { Name, UserName, Email, PassWord, Description, Photo } =
       request.body;
 
-    const newUser = {
-      uid: crypto.randomUUID(),
+    const User = new UserModel({
       name: Name,
       userName: UserName,
       email: Email,
-      PassWord: PassWord,
+      passWord: PassWord,
       CreatedAt: getParsedCurrentDateTime(),
       LastLogIn: getParsedCurrentDateTime(),
       isActive: true,
       descripción: Description,
       photo: Photo,
       deleted: false,
-    };
+    });
 
-    Users.push(newUser);
+    await User.save();
     response.status(201).json({
       ok: true,
       message: "User created successfully.",
-      data: {
-        uid: newUser.uid,
-      },
     });
   } catch (error) {
     response.status(500).json({
@@ -321,7 +312,7 @@ export function CreateUser(request, response) {
   }
 }
 
-export function UpdateUser(request, response) {
+export async function UpdateUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -335,24 +326,20 @@ export function UpdateUser(request, response) {
     }
 
     const { uid, Name, PassWord, Description, Photo } = request.body;
-    const userIndex = Users.findIndex((User) => User.uid === uid);
+    const queryResult = await UserModel.updateOne(
+      { _id: uid },
+      {
+        name: Name,
+        passWord: PassWord,
+        descripción: Description,
+        photo: Photo,
+      }
+    );
+    if (queryResult.matchedCount === 0) throw new Error("User not found");
 
-    if (userIndex === -1) throw new Error("User not found");
-
-    Users[userIndex] = {
-      ...Users[userIndex],
-      name: Name,
-      PassWord: PassWord,
-      descripción: Description,
-      photo: Photo,
-    };
-
-    response.status(201).json({
+    response.status(200).json({
       ok: true,
       message: "User updated successfully.",
-      data: {
-        uid,
-      },
     });
   } catch (error) {
     response.status(500).json({
@@ -363,7 +350,7 @@ export function UpdateUser(request, response) {
   }
 }
 
-export function DeleteUser(request, response) {
+export async function DeleteUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -377,15 +364,15 @@ export function DeleteUser(request, response) {
     }
 
     const { uid } = request.body;
-    const userIndex = Users.findIndex((User) => User.uid === uid);
-    if (userIndex === -1) throw new Error(`User with UID: ${uid} not found.`);
+    const queryResult = await UserModel.updateOne(
+      { _id: uid },
+      { deleted: true }
+    );
 
-    Users[userIndex] = {
-      ...Users[userIndex],
-      deleted: true,
-    };
+    if (queryResult.acknowledged === 0)
+      throw new Error("Not exists an user with uid given.");
 
-    response.status(500).json({
+    response.status(200).json({
       ok: true,
       message: "User deleted successfully.",
     });
@@ -398,7 +385,7 @@ export function DeleteUser(request, response) {
   }
 }
 
-export function RestoreUser(request, response) {
+export async function RestoreUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -412,15 +399,16 @@ export function RestoreUser(request, response) {
     }
 
     const { uid } = request.body;
-    const userIndex = Users.findIndex((User) => User.uid === uid);
-    if (userIndex === -1) throw new Error(`User with UID: ${uid} not found.`);
 
-    Users[userIndex] = {
-      ...Users[userIndex],
-      deleted: false,
-    };
+    const queryResult = await UserModel.updateOne(
+      { _id: uid },
+      { deleted: false }
+    );
 
-    response.status(500).json({
+    if (queryResult.acknowledged === 0)
+      throw new Error("Not exists an user with uid given.");
+
+    response.status(200).json({
       ok: true,
       message: "User retored successfully.",
     });
@@ -432,29 +420,3 @@ export function RestoreUser(request, response) {
     });
   }
 }
-
-export const updateUser = (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const userIndex = Users.findIndex((user) => user.uid === id);
-
-    if (userIndex === -1) {
-      return res.status(404).json({ Message: "User not found" });
-    }
-
-    const updatedUser = {
-      ...Users[userIndex],
-      ...req.body,
-    };
-
-    Users[userIndex] = updatedUser;
-
-    res.status(201).json({
-      ok: true,
-      message: updatedUser,
-    });
-  } catch (error) {
-    res.status(500).json({ Message: "Internal server error" });
-  }
-};
