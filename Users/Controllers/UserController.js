@@ -56,7 +56,7 @@ export function Unfollow(request, response) {
   }
 }
 
-export function FollowUser(request, response) {
+export async function FollowUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -71,14 +71,25 @@ export function FollowUser(request, response) {
 
     const { followerUid, followedUid } = request.body;
 
-    const userIndex = Users.findIndex((U) => U.uid === followerUid);
-    if (userIndex === -1) throw new Error("User not found.");
+    const followerQueryResult = await UserModel.updateOne(
+      { _id: followerUid },
+      {
+        $push: { followed: followedUid },
+      }
+    );
 
-    const followedUserIndex = Users.findIndex((U) => U.uid === followedUid);
-    if (followedUserIndex === -1) throw new Error("Followed User not found.");
+    if (followerQueryResult.matchedCount === 0)
+      throw new Error("Follower not found.");
 
-    Users[userIndex].followed.push(followedUid);
-    Users[followedUserIndex].followers.push(followerUid);
+    const followedQueryResult = await UserModel.updateOne(
+      { _id: followedUid },
+      {
+        $push: { followers: followerUid },
+      }
+    );
+
+    if (followedQueryResult.matchedCount === 0)
+      throw new Error("Followed not found.");
 
     response.status(200).json({
       ok: true,
