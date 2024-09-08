@@ -204,8 +204,6 @@ export async function GetUserByUserName(request, response) {
     const user = await UserModel.find({ userName: UserName }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
-    console.log(user);
-
     response.status(200).json({
       ok: true,
       data: {
@@ -245,8 +243,6 @@ export async function GetUserByEmail(request, response) {
     const { Email } = request.body;
     const user = await UserModel.find({ email: Email }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
-
-    console.log(user);
 
     response.status(200).json({
       ok: true,
@@ -314,7 +310,7 @@ export async function CreateUser(request, response) {
   }
 }
 
-export function UpdateUser(request, response) {
+export async function UpdateUser(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -328,24 +324,20 @@ export function UpdateUser(request, response) {
     }
 
     const { uid, Name, PassWord, Description, Photo } = request.body;
-    const userIndex = Users.findIndex((User) => User.uid === uid);
+    const queryResult = await UserModel.updateOne(
+      { _id: uid },
+      {
+        name: Name,
+        passWord: PassWord,
+        descripción: Description,
+        photo: Photo,
+      }
+    );
+    if (queryResult.matchedCount === 0) throw new Error("User not found");
 
-    if (userIndex === -1) throw new Error("User not found");
-
-    Users[userIndex] = {
-      ...Users[userIndex],
-      name: Name,
-      PassWord: PassWord,
-      descripción: Description,
-      photo: Photo,
-    };
-
-    response.status(201).json({
+    response.status(200).json({
       ok: true,
       message: "User updated successfully.",
-      data: {
-        uid,
-      },
     });
   } catch (error) {
     response.status(500).json({
