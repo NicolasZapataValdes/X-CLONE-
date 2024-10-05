@@ -4,11 +4,11 @@ import {
   deletePostById,
   getAllPosts,
   getPostById,
+  restorePostById,
   updatePostContent,
 } from '../../Posts/Controllers';
 import { PostModel } from '../../Posts/Models';
 import { describe, expect, jest, test } from '@jest/globals';
-import { validationResult } from 'express-validator';
 
 jest.mock('../../Posts/Models');
 
@@ -182,6 +182,53 @@ describe('PostsController.js', () => {
       await deletePostById(req, res);
 
       expect(res.statusCode).toBe(200);
+    });
+
+    test('Should return an error', async () => {
+      PostModel.updateOne = jest.fn(() => ({
+        exec: jest.fn().mockRejectedValue(new Error('Something went wrong')),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await deletePostById(req, res);
+
+      expect(res.statusCode).toBe(500);
+    });
+  });
+
+  describe('restorePostById', () => {
+    test('Should restore a post by id', async () => {
+      const mockPost = {
+        id: '123',
+        title: 'Test Post',
+        content: 'This is a test post content',
+      };
+
+      PostModel.updateOne = jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue(mockPost),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await restorePostById(req, res);
+
+      expect(res.statusCode).toBe(201);
+    });
+
+    test('Should return an error', async () => {
+      PostModel.updateOne = jest.fn(() => ({
+        exec: jest.fn().mockRejectedValue(new Error('Something went wrong')),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await restorePostById(req, res);
+
+      expect(res.statusCode).toBe(500);
     });
   });
 });
