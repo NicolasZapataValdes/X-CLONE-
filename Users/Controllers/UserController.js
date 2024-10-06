@@ -45,7 +45,7 @@ export async function Unfollow(request, response) {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: "An error ocurred while trying to get followers",
+      message: "An error ocurred while trying to unfollow user",
       errorDescription: error?.message,
     });
   }
