@@ -9,6 +9,8 @@ import {
 } from '../../Posts/Controllers';
 import { PostModel } from '../../Posts/Models';
 import { describe, expect, jest, test } from '@jest/globals';
+import supertest from 'supertest';
+import { app } from '../../app.js';
 
 jest.mock('../../Posts/Models');
 
@@ -65,15 +67,33 @@ describe('PostsController.js', () => {
         exec: jest.fn().mockResolvedValue(mockPost),
       }));
 
-      const req = createRequest({
-        params: { id: '123' },
-      });
-
+      const req = createRequest();
       const res = createResponse();
 
       await getPostById(req, res);
 
       expect(res.statusCode).toBe(200);
+    });
+
+    test('Should return 400 when body is empty', async () => {
+      const response = await supertest(app)
+        .get(`/api/v1/posts/123`)
+        .query({ id: '123' });
+
+      expect(response.ok).toBe(false);
+    });
+
+    test('Should return 404 when post not found', async () => {
+      PostModel.findById = jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await getPostById(req, res);
+
+      expect(res.statusCode).toBe(404);
     });
 
     test('Should return an error', async () => {
@@ -116,6 +136,12 @@ describe('PostsController.js', () => {
       expect(res.statusCode).toBe(201);
     });
 
+    test('Should return 400 when creating post body request is empty', async () => {
+      const response = await supertest(app).post('/api/v1/posts').send({});
+
+      expect(response.ok).toBe(false);
+    });
+
     test('Should return an error', async () => {
       const req = createRequest();
       const res = createResponse();
@@ -148,6 +174,25 @@ describe('PostsController.js', () => {
       await updatePostContent(req, res);
 
       expect(res.statusCode).toBe(200);
+    });
+
+    test('Should return 400 when updating post content body request is empty', async () => {
+      const response = await supertest(app).patch('/api/v1/posts/123').send({});
+
+      expect(response.ok).toBe(false);
+    });
+
+    test('Should return 404 when post does not exist', async () => {
+      PostModel.updateOne = jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue({ matchedCount: 0 }),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await updatePostContent(req, res);
+
+      expect(res.statusCode).toBe(404);
     });
 
     test('Should return an error', async () => {
@@ -184,6 +229,25 @@ describe('PostsController.js', () => {
       expect(res.statusCode).toBe(200);
     });
 
+    test('Should return 400 when body is empty', async () => {
+      const response = await supertest(app).patch(`/api/v1/posts/delete/123`);
+
+      expect(response.ok).toBe(false);
+    });
+
+    test('Should return 404 when post does not exist', async () => {
+      PostModel.updateOne = jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue({ matchedCount: 0 }),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await deletePostById(req, res);
+
+      expect(res.statusCode).toBe(404);
+    });
+
     test('Should return an error', async () => {
       PostModel.updateOne = jest.fn(() => ({
         exec: jest.fn().mockRejectedValue(new Error('Something went wrong')),
@@ -216,6 +280,25 @@ describe('PostsController.js', () => {
       await restorePostById(req, res);
 
       expect(res.statusCode).toBe(201);
+    });
+
+    test('Should return 400 when body is empty', async () => {
+      const response = await supertest(app).patch(`/api/v1/posts/restore/123`);
+
+      expect(response.ok).toBe(false);
+    });
+
+    test('Should return 404 when post does not exist', async () => {
+      PostModel.updateOne = jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue({ matchedCount: 0 }),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await restorePostById(req, res);
+
+      expect(res.statusCode).toBe(404);
     });
 
     test('Should return an error', async () => {
