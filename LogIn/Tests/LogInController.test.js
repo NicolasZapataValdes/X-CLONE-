@@ -4,6 +4,8 @@ import { describe, expect, jest, test } from "@jest/globals";
 import {
   LogInWithEmailAndPassWord,
   LogInWithUserNameAndPassWord,
+  LogOutWithEmailAndPassWord,
+  LogOutWithUserNameAndPassWord,
 } from "../Controller/index.js";
 import supertest from "supertest";
 import { app } from "../../app.js";
@@ -142,6 +144,144 @@ describe("LogInController", () => {
         const request = createRequest();
         const response = createResponse();
         await LogInWithUserNameAndPassWord(request, response);
+
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(500);
+        expect(jsonRequest.ok).toBe(false);
+      });
+    });
+  });
+  describe("LogOut With Email And Password", () => {
+    describe("When everything is ok", () => {
+      test("should return ok true", async () => {
+        const mockedUser = {
+          email: "ThomasParker24@correo.com",
+          passWord: "1234",
+          isActive: false,
+        };
+
+        UserModel.updateOne = jest.fn(() => ({
+          exec: jest.fn().mockResolvedValue(mockedUser),
+        }));
+
+        const request = createRequest();
+        const response = createResponse();
+        await LogOutWithEmailAndPassWord(request, response);
+
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(200);
+        expect(jsonRequest.ok).toBe(true);
+      });
+    });
+    describe("When body request is empty", () => {
+      test("should return ok false", async () => {
+        const response = await supertest(app)
+          .post("/api/v1/LogOutWithEmailAndPassWord")
+          .send({});
+
+        expect(response.ok).toBe(false);
+      });
+    });
+    describe("When email is missing in body request", () => {
+      test("should return ok false and description", async () => {
+        const response = await supertest(app)
+          .post("/api/v1/LogOutWithEmailAndPassWord")
+          .send({
+            passWord: "1234",
+          });
+
+        expect(response.ok).toBe(false);
+      });
+    });
+    describe("When password is missing in body request.", () => {
+      test("should return ok false and description", async () => {
+        const response = await supertest(app)
+          .post("/api/v1/LogOutWithEmailAndPassWord")
+          .send({
+            email: "ThomasParker24@correo.com",
+          });
+
+        expect(response.ok).toBe(false);
+      });
+    });
+    describe("When no user match found", () => {
+      test("should return ok false and error description", async () => {
+        UserModel.updateOne = jest.fn(() => ({
+          exec: jest.fn().mockResolvedValue({ matchedCount: 0 }),
+        }));
+
+        const request = createRequest();
+        const response = createResponse();
+        await LogOutWithEmailAndPassWord(request, response);
+
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(500);
+        expect(jsonRequest.ok).toBe(false);
+      });
+    });
+  });
+  describe("LogOut With UserName And Password", () => {
+    describe("When everything is ok", () => {
+      test("should return ok true", async () => {
+        const mockedUser = {
+          email: "ThomasParker24@correo.com",
+          passWord: "1234",
+          isActive: false,
+        };
+
+        UserModel.updateOne = jest.fn(() => ({
+          exec: jest.fn().mockResolvedValue(mockedUser),
+        }));
+
+        const request = createRequest();
+        const response = createResponse();
+        await LogOutWithUserNameAndPassWord(request, response);
+
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(200);
+        expect(jsonRequest.ok).toBe(true);
+      });
+    });
+    describe("When body request is empty", () => {
+      test("should return ok false", async () => {
+        const response = await supertest(app)
+          .post("/api/v1/LogOutWithUserNameAndPassWord")
+          .send({});
+
+        expect(response.ok).toBe(false);
+      });
+    });
+    describe("When email is missing in body request", () => {
+      test("should return ok false and description", async () => {
+        const response = await supertest(app)
+          .post("/api/v1/LogOutWithUserNameAndPassWord")
+          .send({
+            passWord: "1234",
+          });
+
+        expect(response.ok).toBe(false);
+      });
+    });
+    describe("When password is missing in body request.", () => {
+      test("should return ok false and description", async () => {
+        const response = await supertest(app)
+          .post("/api/v1/LogOutWithUserNameAndPassWord")
+          .send({
+            email: "ThomasParker24@correo.com",
+          });
+
+        expect(response.ok).toBe(false);
+      });
+    });
+    describe("When no user match found", () => {
+      test("should return ok false and error description", async () => {
+        UserModel.updateOne = jest.fn(() => ({
+          exec: jest.fn().mockResolvedValue({ matchedCount: 0 }),
+        }));
+
+        const request = createRequest();
+        const response = createResponse();
+        await LogOutWithUserNameAndPassWord(request, response);
 
         const jsonRequest = response._getJSONData();
         expect(response.statusCode).toBe(500);
