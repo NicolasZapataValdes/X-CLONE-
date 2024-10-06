@@ -24,7 +24,7 @@ export async function LogInWithEmailAndPassWord(request, response) {
 
     response.json({
       ok: true,
-      message: "User logged In succesfully",
+      message: "User loggedIn succesfully",
     });
   } catch (error) {
     response.status(500).json({
@@ -93,12 +93,12 @@ export async function LogOutWithEmailAndPassWord(request, response) {
 
     response.json({
       ok: true,
-      message: "User logged Out succesfully",
+      message: "User loggedOut succesfully",
     });
   } catch (error) {
     response.status(500).json({
       ok: false,
-      message: "Error while trying to Log Out With Email and Password",
+      message: "Error while trying to LogOut With Email and Password",
       errorDescription: error?.message,
     });
   }
