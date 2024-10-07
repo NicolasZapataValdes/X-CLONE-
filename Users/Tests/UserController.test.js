@@ -1,3 +1,11 @@
+import supertest from "supertest";
+import { createRequest, createResponse } from "node-mocks-http";
+import { describe, expect, jest, test } from "@jest/globals";
+import { app } from "../../app.js";
+import { UserModel } from "../Models/index.js";
+
+jest.mock("../../Users/Models/UserModel.js");
+
 describe("UserController.js", () => {
   describe("Unfollow User", () => {
     describe("When everything is ok", () => {
