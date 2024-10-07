@@ -140,34 +140,6 @@ describe('UserController.js', () => {
       });
     });
   });
-  describe('Get Followers by UID', () => {
-    describe('When everything is ok', () => {
-      test('should return ok true', () => {});
-    });
-    describe('When something went wrong', () => {
-      test('should return ok false and error description', () => {});
-    });
-    describe('When UID is invalid', () => {
-      test('should return ok false and error description', () => {});
-    });
-    describe('When user not found', () => {
-      test('should return ok false and error description', () => {});
-    });
-  });
-  describe('Get Followed by UID', () => {
-    describe('When everything is ok', () => {
-      test('should return ok true', () => {});
-    });
-    describe('When something went wrong', () => {
-      test('should return ok false and error description', () => {});
-    });
-    describe('When UID is invalid', () => {
-      test('should return ok false and error description', () => {});
-    });
-    describe('When user not found', () => {
-      test('should return ok false and error description', () => {});
-    });
-  });
   describe('GetUserByUserName', () => {
     test('Should return a user by name', async () => {
       const mockUser = [
