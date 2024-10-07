@@ -11,6 +11,9 @@ import {
   FollowUser,
   Unfollow,
   GetFollowedUsersByUid,
+  UpdateUser,
+  DeleteUser,
+  RestoreUser,
 } from '../Controllers/UserController.js';
 
 jest.mock('../../Users/Models/UserModel.js');
@@ -355,6 +358,135 @@ describe('UserController.js', () => {
       await GetFollowedUsersByUid(req, res);
 
       expect(res.statusCode).toBe(500);
+    });
+  });
+  describe('UpdateUser', () => {
+    test('Should update an user', async () => {
+      UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+
+      const request = createRequest();
+      const response = createResponse();
+
+      await UpdateUser(request, response);
+      const jsonRequest = response._getJSONData();
+      expect(response.statusCode).toBe(200);
+      expect(jsonRequest.ok).toBe(true);
+    });
+
+    test('should return ok false and error description', async () => {
+      const response = await supertest(app)
+        .patch('/api/v1/UpdateUser')
+        .send({});
+
+      expect(response.ok).toBe(false);
+    });
+
+    test('should return ok false and error description', async () => {
+      UserModel.updateOne = jest
+        .fn()
+        .mockRejectedValue(new Error('Something went wrong.'));
+
+      const request = createRequest();
+      const response = createResponse();
+
+      await UpdateUser(request, response);
+      const jsonRequest = response._getJSONData();
+      expect(response.statusCode).toBe(500);
+      expect(jsonRequest.ok).toBe(false);
+    });
+  });
+  describe('DeleteUser', () => {
+    test('Should delete an user', async () => {
+      UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+
+      const request = createRequest();
+      const response = createResponse();
+
+      await DeleteUser(request, response);
+      const jsonRequest = response._getJSONData();
+      expect(response.statusCode).toBe(200);
+      expect(jsonRequest.ok).toBe(true);
+    });
+
+    test('should return ok false and error description', async () => {
+      UserModel.updateOne = jest.fn().mockResolvedValue({ acknowledged: 0 });
+
+      const request = createRequest();
+      const response = createResponse();
+
+      await DeleteUser(request, response);
+      const jsonRequest = response._getJSONData();
+      expect(response.statusCode).toBe(500);
+      expect(jsonRequest.ok).toBe(false);
+    });
+
+    test('should return ok false and error description', async () => {
+      const response = await supertest(app)
+        .patch('/api/v1/DeleteUser')
+        .send({});
+
+      expect(response.ok).toBe(false);
+    });
+
+    test('should return ok false and error description', async () => {
+      UserModel.updateOne = jest
+        .fn()
+        .mockRejectedValue(new Error('Something went wrong.'));
+
+      const request = createRequest();
+      const response = createResponse();
+
+      await DeleteUser(request, response);
+      const jsonRequest = response._getJSONData();
+      expect(response.statusCode).toBe(500);
+      expect(jsonRequest.ok).toBe(false);
+    });
+  });
+  describe('RestoreUser', () => {
+    test('Should restore an user', async () => {
+      UserModel.updateOne = jest.fn().mockResolvedValue({ acknowledged: 1 });
+
+      const request = createRequest();
+      const response = createResponse();
+
+      await RestoreUser(request, response);
+      const jsonRequest = response._getJSONData();
+      expect(response.statusCode).toBe(200);
+      expect(jsonRequest.ok).toBe(true);
+    });
+
+    test('should return ok false and error description', async () => {
+      UserModel.updateOne = jest.fn().mockResolvedValue({ acknowledged: 0 });
+
+      const request = createRequest();
+      const response = createResponse();
+
+      await RestoreUser(request, response);
+      const jsonRequest = response._getJSONData();
+      expect(response.statusCode).toBe(500);
+      expect(jsonRequest.ok).toBe(false);
+    });
+
+    test('should return ok false and error description', async () => {
+      const response = await supertest(app)
+        .patch('/api/v1/RestoreUser')
+        .send({});
+
+      expect(response.ok).toBe(false);
+    });
+
+    test('should return ok false and error description', async () => {
+      UserModel.updateOne = jest
+        .fn()
+        .mockRejectedValue(new Error('Something went wrong.'));
+
+      const request = createRequest();
+      const response = createResponse();
+
+      await RestoreUser(request, response);
+      const jsonRequest = response._getJSONData();
+      expect(response.statusCode).toBe(500);
+      expect(jsonRequest.ok).toBe(false);
     });
   });
 });
