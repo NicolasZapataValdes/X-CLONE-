@@ -8,6 +8,9 @@ import {
   GetFollowersByUid,
   GetUserByEmail,
   GetUserByUserName,
+  FollowUser,
+  Unfollow,
+  GetFollowedUsersByUid,
 } from '../Controllers/UserController.js';
 
 jest.mock('../../Users/Models/UserModel.js');
@@ -15,30 +18,126 @@ jest.mock('../../Users/Models/UserModel.js');
 describe('UserController.js', () => {
   describe('Unfollow User', () => {
     describe('When everything is ok', () => {
-      test('should return ok true', () => {});
+      test('should return ok true', async () => {
+        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+
+        const request = createRequest();
+        const response = createResponse();
+
+        await Unfollow(request, response);
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(200);
+        expect(jsonRequest.ok).toBe(true);
+      });
+    });
+    describe('When Follower not found', () => {
+      test('should return ok false', async () => {
+        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 0 });
+        const request = createRequest();
+        const response = createResponse();
+
+        await Unfollow(request, response);
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(500);
+        expect(jsonRequest.ok).toBe(false);
+      });
     });
     describe('When followerUID is invalid', () => {
-      test('should return ok false and error description.', () => {});
+      test('should return ok false and error description.', async () => {
+        const response = await supertest(app)
+          .post('/api/v1/UnfollowUser')
+          .send({
+            followedUid: '1234',
+          });
+
+        expect(response.ok).toBe(false);
+      });
     });
     describe('When followedUID is invalid', () => {
-      test('should return ok false and error description', () => {});
+      test('should return ok false and error description', async () => {
+        const response = await supertest(app)
+          .post('/api/v1/UnfollowUser')
+          .send({
+            followerUid: '1234',
+          });
+
+        expect(response.ok).toBe(false);
+      });
     });
     describe('When something went wrong.', () => {
-      test('should return ok false and error description', () => {});
+      test('should return ok false and error description', async () => {
+        UserModel.updateOne = jest
+          .fn()
+          .mockRejectedValue(new Error('Something went wrong.'));
+
+        const request = createRequest();
+        const response = createResponse();
+
+        await Unfollow(request, response);
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(500);
+        expect(jsonRequest.ok).toBe(false);
+      });
     });
   });
   describe('Follow User', () => {
     describe('When everything is ok', () => {
-      test('should return ok true', () => {});
+      test('should return ok true', async () => {
+        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+
+        const request = createRequest();
+        const response = createResponse();
+
+        await FollowUser(request, response);
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(200);
+        expect(jsonRequest.ok).toBe(true);
+      });
     });
     describe('When followerUID is invalid', () => {
-      test('should return ok false and error description.', () => {});
+      test('should return ok false and error description.', async () => {
+        const response = await supertest(app).post('/api/v1/FollowUser').send({
+          followedUid: '1234',
+        });
+
+        expect(response.ok).toBe(false);
+      });
     });
     describe('When followedUID is invalid', () => {
-      test('should return ok false and error description', () => {});
+      test('should return ok false and error description', async () => {
+        const response = await supertest(app).post('/api/v1/FollowUser').send({
+          followerUid: '1234',
+        });
+
+        expect(response.ok).toBe(false);
+      });
     });
     describe('When something went wrong.', () => {
-      test('should return ok false and error description', () => {});
+      test('should return ok false and error description', async () => {
+        UserModel.updateOne = jest
+          .fn()
+          .mockRejectedValue(new Error('Something went wrong.'));
+
+        const request = createRequest();
+        const response = createResponse();
+
+        await FollowUser(request, response);
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(500);
+        expect(jsonRequest.ok).toBe(false);
+      });
+    });
+    describe('When Follower not found', () => {
+      test('should return ok false', async () => {
+        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 0 });
+        const request = createRequest();
+        const response = createResponse();
+
+        await FollowUser(request, response);
+        const jsonRequest = response._getJSONData();
+        expect(response.statusCode).toBe(500);
+        expect(jsonRequest.ok).toBe(false);
+      });
     });
   });
   describe('Get Followers by UID', () => {
@@ -262,6 +361,26 @@ describe('UserController.js', () => {
       const res = createResponse();
 
       await GetFollowersByUid(req, res);
+
+      expect(res.statusCode).toBe(500);
+    });
+  });
+  describe('GetFollowedUsersByUid', () => {
+    test('Should return 400 when body is empty', async () => {
+      const response = await supertest(app).get('/api/v1/GetFollowedUsers');
+
+      expect(response.ok).toBe(false);
+    });
+
+    test('Should return an error', async () => {
+      UserModel.find = jest.fn(() => ({
+        exec: jest.fn().mockRejectedValue(new Error('Something went wrong')),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await GetFollowedUsersByUid(req, res);
 
       expect(res.statusCode).toBe(500);
     });
