@@ -342,7 +342,7 @@ describe("UserController.js", () => {
   });
   describe("GetFollowedUsersByUid", () => {
     test("Should return 400 when body is empty", async () => {
-      const response = await supertest(app).get("/api/v1/User/Followers");
+      const response = await supertest(app).get("/api/v1/User/Followed");
 
       expect(response.ok).toBe(false);
     });
