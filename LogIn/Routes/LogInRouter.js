@@ -14,22 +14,22 @@ import {
 } from "../Validator/index.js";
 
 logInRouter.post(
-  "/LogInWithEmailAndPassWord",
+  "/Auth/Session/Email",
   ValidateEmailAndPassWord(),
   LogInWithEmailAndPassWord
 );
 logInRouter.post(
-  "/LogInWithUserNameAndPassWord",
+  "/Auth/Session/UserName",
   ValidateUserNameAndPassWord(),
   LogInWithUserNameAndPassWord
 );
-logInRouter.post(
-  "/LogOutWithEmailAndPassWord",
+logInRouter.delete(
+  "/Auth/Session/Email",
   ValidateEmailAndPassWord(),
   LogOutWithEmailAndPassWord
 );
-logInRouter.post(
-  "/LogOutWithUserNameAndPassWord",
+logInRouter.delete(
+  "/Auth/Session/UserName",
   ValidateUserNameAndPassWord(),
   LogOutWithUserNameAndPassWord
 );

@@ -69,17 +69,13 @@ const swaggerOptions = {
       "/api/v1/posts/restore/:id": {
         patch: restorePostById,
       },
-      "/api/v1/LogInWithEmailAndPassWord": {
+      "/api/v1/Auth/Session/Email": {
         post: LogInWithEmailAndPassWord,
+        delete: LogOutWithEmailAndPassWord,
       },
-      "/api/v1/LogInWithUserNameAndPassWord": {
+      "/api/v1/Auth/Session/UserName": {
         post: LogInUserNameAndPassWord,
-      },
-      "/api/v1/LogOutWithEmailAndPassWord": {
-        post: LogOutWithEmailAndPassWord,
-      },
-      "/api/v1/LogOutWithUserNameAndPassWord": {
-        post: LogOutWithUserNameAndPassWord,
+        delete: LogOutWithUserNameAndPassWord,
       },
       "/api/v1/CreateUser": {
         post: CreateUser,
