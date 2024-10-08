@@ -69,46 +69,40 @@ const swaggerOptions = {
       "/api/v1/posts/restore/:id": {
         patch: restorePostById,
       },
-      "/api/v1/LogInWithEmailAndPassWord": {
+      "/api/v1/Auth/Session/Email": {
         post: LogInWithEmailAndPassWord,
+        delete: LogOutWithEmailAndPassWord,
       },
-      "/api/v1/LogInWithUserNameAndPassWord": {
+      "/api/v1/Auth/Session/UserName": {
         post: LogInUserNameAndPassWord,
+        delete: LogOutWithUserNameAndPassWord,
       },
-      "/api/v1/LogOutWithEmailAndPassWord": {
-        post: LogOutWithEmailAndPassWord,
-      },
-      "/api/v1/LogOutWithUserNameAndPassWord": {
-        post: LogOutWithUserNameAndPassWord,
-      },
-      "/api/v1/CreateUser": {
+      "/api/v1/User": {
         post: CreateUser,
-      },
-      "/api/v1/DeleteUser": {
-        patch: DeleteUser,
-      },
-      "/api/v1/RestoreUser": {
-        patch: RestoreUser,
-      },
-      "/api/v1/UpdateUser": {
         patch: UpdateUser,
       },
-      "/api/v1/GetUserByUserName": {
+      "/api/v1/User/Delete": {
+        patch: DeleteUser,
+      },
+      "/api/v1/User/Restore": {
+        patch: RestoreUser,
+      },
+      "/api/v1/User/UserName": {
         get: GetUserByUserName,
       },
-      "/api/v1/GetUserByEmail": {
+      "/api/v1/User/Email": {
         get: GetUserByEmail,
       },
-      "/api/v1/GetFollowers": {
+      "/api/v1/User/Followers": {
         get: GetFollowersByUid,
       },
-      "/api/v1/GetFollowedUsers": {
+      "/api/v1/User/Followed": {
         get: GetFollowedUsersByUid,
       },
-      "/api/v1/FollowUser": {
+      "/api/v1/User/Follow": {
         post: FollowUser,
       },
-      "/api/v1/UnfollowUser": {
+      "/api/v1/User/UnFollow": {
         post: UnFollowUser,
       },
     },

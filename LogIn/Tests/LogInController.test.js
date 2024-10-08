@@ -38,7 +38,7 @@ describe("LogInController", () => {
     describe("When body request is empty", () => {
       test("should return ok false", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogInWithEmailAndPassWord")
+          .post("/api/v1/Auth/Session/Email")
           .send({});
 
         expect(response.ok).toBe(false);
@@ -47,7 +47,7 @@ describe("LogInController", () => {
     describe("When email is missing in body request", () => {
       test("should return ok false and description", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogInWithEmailAndPassWord")
+          .post("/api/v1/Auth/Session/Email")
           .send({
             passWord: "1234",
           });
@@ -58,7 +58,7 @@ describe("LogInController", () => {
     describe("When password is missing in body request.", () => {
       test("should return ok false and description", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogInWithEmailAndPassWord")
+          .post("/api/v1/Auth/Session/Email")
           .send({
             email: "ThomasParker24@correo.com",
           });
@@ -107,7 +107,7 @@ describe("LogInController", () => {
     describe("When body is empty", () => {
       test("should return ok false", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogInWithUserNameAndPassWord")
+          .post("/api/v1/Auth/Session/UserName")
           .send({});
 
         expect(response.ok).toBe(false);
@@ -116,7 +116,7 @@ describe("LogInController", () => {
     describe("When UserName is missing in body request", () => {
       test("should return ok false and description", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogInWithUserNameAndPassWord")
+          .post("/api/v1/Auth/Session/UserName")
           .send({
             passWord: "1234",
           });
@@ -127,7 +127,7 @@ describe("LogInController", () => {
     describe("When password is missing in body request.", () => {
       test("should return ok false and description", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogInWithUserNameAndPassWord")
+          .post("/api/v1/Auth/Session/UserName")
           .send({
             UserName: "ThomasParker24",
           });
@@ -176,7 +176,7 @@ describe("LogInController", () => {
     describe("When body request is empty", () => {
       test("should return ok false", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogOutWithEmailAndPassWord")
+          .delete("/api/v1/Auth/Session/Email")
           .send({});
 
         expect(response.ok).toBe(false);
@@ -185,7 +185,7 @@ describe("LogInController", () => {
     describe("When email is missing in body request", () => {
       test("should return ok false and description", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogOutWithEmailAndPassWord")
+          .delete("/api/v1/Auth/Session/Email")
           .send({
             passWord: "1234",
           });
@@ -196,7 +196,7 @@ describe("LogInController", () => {
     describe("When password is missing in body request.", () => {
       test("should return ok false and description", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogOutWithEmailAndPassWord")
+          .delete("/api/v1/Auth/Session/Email")
           .send({
             email: "ThomasParker24@correo.com",
           });
@@ -245,7 +245,7 @@ describe("LogInController", () => {
     describe("When body request is empty", () => {
       test("should return ok false", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogOutWithUserNameAndPassWord")
+          .delete("/api/v1/Auth/Session/UserName")
           .send({});
 
         expect(response.ok).toBe(false);
@@ -254,7 +254,7 @@ describe("LogInController", () => {
     describe("When email is missing in body request", () => {
       test("should return ok false and description", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogOutWithUserNameAndPassWord")
+          .delete("/api/v1/Auth/Session/UserName")
           .send({
             passWord: "1234",
           });
@@ -265,7 +265,7 @@ describe("LogInController", () => {
     describe("When password is missing in body request.", () => {
       test("should return ok false and description", async () => {
         const response = await supertest(app)
-          .post("/api/v1/LogOutWithUserNameAndPassWord")
+          .delete("/api/v1/Auth/Session/UserName")
           .send({
             email: "ThomasParker24@correo.com",
           });

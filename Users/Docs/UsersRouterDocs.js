@@ -88,7 +88,7 @@ export const UnFollowUser = {
 
 export const FollowUser = {
   tags: ["Users"],
-  description: "This Endpoint allows you to follow a users",
+  description: "This Endpoint allows you to follow an users",
   responses: {
     200: {
       description: "User Followed",
@@ -358,7 +358,7 @@ export const GetFollowedUsersByUid = {
 
 export const GetUserByUserName = {
   tags: ["Users"],
-  description: "This Endpoint allows you to get a user by UserName",
+  description: "This Endpoint allows you to get an user by UserName",
   responses: {
     200: {
       content: {
@@ -452,7 +452,7 @@ export const GetUserByUserName = {
 
 export const GetUserByEmail = {
   tags: ["Users"],
-  description: "This Endpoint allows you to get a user by Email",
+  description: "This Endpoint allows you to get an user by Email",
   responses: {
     200: {
       content: {
@@ -551,7 +551,7 @@ export const GetUserByEmail = {
 
 export const CreateUser = {
   tags: ["Users"],
-  description: "This Endpoint allows you to create a user",
+  description: "This Endpoint allows you to create an user",
   responses: {
     200: {
       content: {
@@ -680,7 +680,7 @@ export const CreateUser = {
 
 export const UpdateUser = {
   tags: ["Users"],
-  description: "This Endpoint allows you to create a user",
+  description: "This Endpoint allows you to update an user",
   responses: {
     200: {
       content: {
@@ -866,7 +866,7 @@ export const DeleteUser = {
 
 export const RestoreUser = {
   tags: ["Users"],
-  description: "This Endpoint allows you to delete an user",
+  description: "This Endpoint allows you to restore an user",
   responses: {
     200: {
       content: {
