@@ -1,6 +1,11 @@
-import { app } from './app.js';
-import { PORT } from './Utils/index.js';
+import { app } from "./app.js";
+import dotenv from "dotenv";
+import { ConnectToDataBase } from "./Database/Controller/index.js";
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port: http://localhost:${PORT}`);
+dotenv.config();
+ConnectToDataBase();
+app.listen(process.env.PORT, () => {
+  console.log(
+    `Server is running on port: http://localhost:${process.env.PORT}`
+  );
 });
