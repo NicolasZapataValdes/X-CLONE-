@@ -1,6 +1,6 @@
 # X-CLONE
 
-This is a copy of X
+This is a copy of X which uses MongoDB
 
 ## How to use the App?
 
@@ -14,6 +14,13 @@ This is a copy of X
 1. [Node.js](https://nodejs.org/en)
 2. [Express.js](https://expressjs.com/)
 3. [Express-validator](https://express-validator.github.io/docs)
+4. [Jest](https://jestjs.io/)
+5. [Mongoose](https://mongoosejs.com/)
+6. [node-mocks-http](https://www.npmjs.com/package/node-mocks-http)
+7. [Supertest](https://www.npmjs.com/package/supertest)
+8. [Swagger-jsdoc](https://www.npmjs.com/package/swagger-jsdoc)
+9. [Swagger-ui-express](https://www.npmjs.com/package/swagger-ui-express)
+10. [Dotenv](https://www.npmjs.com/package/dotenv)
 
 ## Team members
 
@@ -27,51 +34,6 @@ This is a copy of X
 > All our endpoints start with /api/v1
 > Example: /api/v1/LogInWithEmailAndPassWord
 
-### Login related
+## Documentation
 
-- (POST) /LogInWithEmailAndPassWord
-  > This Endpoint allows you to logIn with email and password
-- (POST) /LogInWithUserNameAndPassWord
-  > This Endpoint allows you to logIn with user name and password
-- (POST) /LogOutWithEmailAndPassWord
-  > This Endpoint allows you to logOut with email and password
-- (POST) /LogOutWithUserNameAndPassWord
-  > This Endpoint allows you to logOut with user name and password
-
-### Users related
-
-- (GET) /GetUserByUserName
-  > This Endpoint allows you to get a user by name
-- (GET) /GetUserByEmail
-  > This Endpoint allows you to get a user by email
-- (POST) /CreateUser
-  > This Endpoint allows you to create a user
-- (PATCH) /DeleteUser
-  > This Endpoint allows you to ONLY update the deleted propery
-- (PATCH) /RestoreUser
-  > This Endpoint allows you to ONLY update the deleted propery
-- (PATCH) /UpdateUser
-  > This Endpoint allows you to update the a user
-- (GET) /GetFollowers
-  > This Endpoint allows you to get followers by UID
-- (GET) /GetFollowedUsers
-  > This Endpoint allows you to get followed users by UID
-- (POST) /FollowUser
-  > This Endpoint allows you to follow a users
-- (POST) /UnfollowUser
-  > This Endpoint allows you to UNfollow a users
-
-### Post related
-
-- (GET) /posts
-  > This Endpoint allows you to get all posts
-- (GET) /posts/:id
-  > This Endpoint allows you to get a post by
-- (POST) /posts
-  > This Endpoint allows you to create a post
-- (PATCH) posts/:id
-  > This Endpoint allows you to ONLY update the content property
-- (PATCH) /posts/delete/:id
-  > This Endpoint allows you to ONLY update the deleted property
-- (PATCH) /posts/restore/:id
-  > This Endpoint allows you to ONLY update the deleted property
+Our documentation is on Swagger, you need to run the server and then go to next url: http://localhost:1234/api/v1/docs/
