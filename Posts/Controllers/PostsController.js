@@ -1,6 +1,6 @@
-import { validationResult } from 'express-validator';
-import { PostModel } from '../Models/index.js';
-import { getParsedCurrentDateTime } from '../../Utils/Functions/Functions.js';
+import { validationResult } from "express-validator";
+import { PostModel } from "../Models/index.js";
+import { getParsedCurrentDateTime } from "../../Utils/Functions/Functions.js";
 
 export async function getAllPosts(req, res) {
   try {
@@ -13,7 +13,7 @@ export async function getAllPosts(req, res) {
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to get posts',
+      message: "An error ocurred while trying to get posts",
       errorDescription: error?.message,
     });
   }
@@ -35,7 +35,7 @@ export async function getPostById(req, res) {
     const post = await PostModel.findById(id).exec();
 
     if (!post || post.length === 0) {
-      return res.status(404).json({ ok: false, message: 'Post not found' });
+      return res.status(404).json({ ok: false, message: "Post not found" });
     }
 
     res.status(200).json({
@@ -45,7 +45,7 @@ export async function getPostById(req, res) {
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to get post by uid',
+      message: "An error ocurred while trying to get post by uid",
       errorDescription: error?.message,
     });
   }
@@ -63,24 +63,24 @@ export async function createPost(req, res) {
       });
     }
 
-    const { createdAt, creatorUID, updatedAt, deleted, content } = req.body;
+    const { content } = req.body;
     const newPost = new PostModel({
       content: content,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      creatorUID: creatorUID,
-      deleted: deleted,
+      createdAt: getParsedCurrentDateTime(),
+      updatedAt: getParsedCurrentDateTime(),
+      creatorUID: req.User,
+      deleted: false,
     });
 
     await newPost.save();
     res.status(201).json({
       ok: true,
-      message: 'Post created successfully',
+      message: "Post created successfully",
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to create a new post',
+      message: "An error ocurred while trying to create a new post",
       errorDescription: error?.message,
     });
   }
@@ -110,17 +110,17 @@ export async function updatePostContent(req, res) {
     ).exec();
 
     if (queryResult.matchedCount === 0) {
-      return res.status(404).json({ ok: false, message: 'Post not found.' });
+      return res.status(404).json({ ok: false, message: "Post not found." });
     }
 
     res.status(200).json({
       ok: true,
-      message: 'Post updated successfully',
+      message: "Post updated successfully",
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to update post content',
+      message: "An error ocurred while trying to update post content",
       errorDescription: error?.message,
     });
   }
@@ -146,17 +146,17 @@ export async function deletePostById(req, res) {
     ).exec();
 
     if (queryResult.matchedCount === 0) {
-      return res.status(404).json({ ok: false, Message: 'Post not found' });
+      return res.status(404).json({ ok: false, Message: "Post not found" });
     }
 
     res.status(200).json({
       ok: true,
-      message: 'Post deleted successfully',
+      message: "Post deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to delete post',
+      message: "An error ocurred while trying to delete post",
       errorDescription: error?.message,
     });
   }
@@ -182,17 +182,17 @@ export async function restorePostById(req, res) {
     ).exec();
 
     if (queryResult.matchedCount === 0) {
-      return res.status(404).json({ ok: false, Message: 'Post not found' });
+      return res.status(404).json({ ok: false, Message: "Post not found" });
     }
 
     res.status(201).json({
       ok: true,
-      message: 'Post restored successfully',
+      message: "Post restored successfully",
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'An error ocurred while trying to restore post',
+      message: "An error ocurred while trying to restore post",
       errorDescription: error?.message,
     });
   }
