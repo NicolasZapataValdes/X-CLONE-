@@ -8,6 +8,7 @@ import {
   updatePostContent,
   deletePostById,
   restorePostById,
+  GetPostsCreatedByFollowingUsers,
 } from "../Controllers/index.js";
 
 import {
@@ -18,7 +19,14 @@ import {
   validateGetPostById,
 } from "../Validators/index.js";
 
-postRouter.get("/posts/all", getAllPosts);
+import { ValidateToken } from "../../Utils/Functions/index.js";
+
+postRouter.get(
+  "/posts/following",
+  ValidateToken,
+  GetPostsCreatedByFollowingUsers
+);
+postRouter.get("/posts/all", ValidateToken, getAllPosts);
 postRouter.get("/posts/:id", validateGetPostById(), getPostById);
 postRouter.post("/posts", validatePost(), createPost);
 postRouter.patch("/posts/:id", validateUpdatePostContent(), updatePostContent);

@@ -1,6 +1,7 @@
 import { validationResult } from "express-validator";
 import { PostModel } from "../Models/index.js";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/Functions.js";
+import { GetFollowedUsersIDByUID } from "../../Users/Controllers/index.js";
 
 export async function getAllPosts(req, res) {
   try {
@@ -193,6 +194,43 @@ export async function restorePostById(req, res) {
     res.status(500).json({
       ok: false,
       message: "An error ocurred while trying to restore post",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export async function GetPostsCreatedByFollowingUsers(req, res) {
+  try {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      return res.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+    }
+
+    const followedUsers = await GetFollowedUsersIDByUID(req.user);
+
+    if (!followedUsers)
+      throw new Error("An error ocurred while trying to get Followed Users.");
+
+    const queryResult = await PostModel.find({
+      creatorUID: { $in: followedUsers.followed },
+    })
+      .limit(10)
+      .exec();
+
+    return res.status(200).json({
+      ok: true,
+      data: queryResult,
+      length: queryResult.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      message:
+        "An error ocurred while trying to get posts created by followed users.",
       errorDescription: error?.message,
     });
   }
