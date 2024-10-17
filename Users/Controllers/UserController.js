@@ -2,6 +2,19 @@ import { validationResult } from "express-validator";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
 import { UserModel } from "../Models/index.js";
 
+export async function GetFollowedUsersIDByUID(userIUD) {
+  try {
+    if (!userIUD) throw new Error("UserIUD is invalid.");
+    return await UserModel.findById(userIUD, "followed").exec();
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followed array.",
+      errorDescription: error?.message,
+    });
+  }
+}
+
 export async function Unfollow(request, response) {
   try {
     const result = validationResult(request);
