@@ -5,11 +5,35 @@ import { GetFollowedUsersIDByUID } from "../../Users/Controllers/index.js";
 
 export async function getAllPosts(req, res) {
   try {
-    const queryResult = await PostModel.find().limit(10).exec();
+    let queryResult = [];
+
+    const { LastPostID, LastPostCreatedAt } = req.body;
+
+    if (LastPostID && LastPostCreatedAt) {
+      queryResult = await PostModel.find()
+        .lte("createdAt", LastPostCreatedAt)
+        .nor([{ _id: LastPostID }])
+        .limit(10)
+        .sort("-createdAt")
+        .exec();
+    } else {
+      queryResult = await PostModel.find().limit(10).sort("-createdAt").exec();
+    }
 
     res.status(200).json({
       ok: true,
+      length: queryResult.length,
       posts: queryResult,
+      lastPostInfo: {
+        id:
+          queryResult.length > 0
+            ? queryResult[queryResult.length - 1]._id
+            : undefined,
+        CreatedDateTime:
+          queryResult.length > 0
+            ? queryResult[queryResult.length - 1].createdAt
+            : undefined,
+      },
     });
   } catch (error) {
     res.status(500).json({
