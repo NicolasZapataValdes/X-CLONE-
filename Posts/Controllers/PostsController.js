@@ -63,12 +63,16 @@ export async function createPost(req, res) {
       });
     }
 
-    const { createdAt, creatorUID, updatedAt, deleted, content } = req.body;
+    const { content } = req.body;
     const newPost = new PostModel({
       content: content,
       createdAt: getParsedCurrentDateTime(),
       updatedAt: getParsedCurrentDateTime(),
+<<<<<<< HEAD
       creatorUID: req.user,
+=======
+      creatorUID: req.User,
+>>>>>>> 8d64c8e2086de66b0b85ba99ef65c1d4422e1875
       deleted: false,
     });
 
