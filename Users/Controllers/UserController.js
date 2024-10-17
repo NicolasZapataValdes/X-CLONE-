@@ -28,28 +28,27 @@ export async function Unfollow(request, response) {
 
       return;
     }
-
     const { followerUid, followedUid } = request.body;
 
-    const followerQueryResult = await UserModel.updateOne(
-      { _id: followerUid },
+    const bulkOperations = [
       {
-        $pull: { followed: followedUid },
-      }
-    );
-
-    if (followerQueryResult.matchedCount === 0)
-      throw new Error("Follower not found.");
-
-    const followedQueryResult = await UserModel.updateOne(
-      { _id: followedUid },
+        updateOne: {
+          filter: { _id: followerUid },
+          update: { $pull: { followed: followedUid } },
+        },
+      },
       {
-        $pull: { followers: followerUid },
-      }
-    );
+        updateOne: {
+          filter: { _id: followedUid },
+          update: { $pull: { followers: followerUid } },
+        },
+      },
+    ];
 
-    if (followedQueryResult.matchedCount === 0)
-      throw new Error("Followed not found.");
+    const BulkQueryResult = await UserModel.bulkWrite(bulkOperations);
+
+    if (BulkQueryResult.modifiedCount <= 0)
+      throw new Error("Bulk query cannot be executed.");
 
     response.status(200).json({
       ok: true,
@@ -79,25 +78,25 @@ export async function FollowUser(request, response) {
 
     const { followerUid, followedUid } = request.body;
 
-    const followerQueryResult = await UserModel.updateOne(
-      { _id: followerUid },
+    const bulkOperations = [
       {
-        $push: { followed: followedUid },
-      }
-    );
-
-    if (followerQueryResult.matchedCount === 0)
-      throw new Error("Follower not found.");
-
-    const followedQueryResult = await UserModel.updateOne(
-      { _id: followedUid },
+        updateOne: {
+          filter: { _id: followerUid },
+          update: { $push: { followed: followedUid } },
+        },
+      },
       {
-        $push: { followers: followerUid },
-      }
-    );
+        updateOne: {
+          filter: { _id: followedUid },
+          update: { $push: { followers: followerUid } },
+        },
+      },
+    ];
 
-    if (followedQueryResult.matchedCount === 0)
-      throw new Error("Followed not found.");
+    const queryResult = await UserModel.bulkWrite(bulkOperations);
+
+    if (queryResult.modifiedCount <= 0)
+      throw new Error("Bulk query cannot be executed.");
 
     response.status(200).json({
       ok: true,
