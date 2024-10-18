@@ -16,25 +16,19 @@ export async function LogInWithEmailAndPassWord(request, response) {
     }
 
     const { email, passWord } = request.body;
-    const queryResult = await UserModel.updateOne(
+
+    const UpdateResult = await UserModel.findOneAndUpdate(
       { email: email, passWord: passWord },
-      { isActive: true }
+      { $set: { isActive: true } }
     ).exec();
 
-    if (queryResult.matchedCount === 0) throw new Error("User not found.");
-
-    const UserUID = await UserModel.findOne(
-      { email: email, passWord: passWord },
-      "_id"
-    );
-
-    if (!UserUID)
-      throw new Error("An error ocurred while trying to get UserUID.");
+    if (!UpdateResult)
+      throw new Error("An error ocurred while trying to get User.");
 
     response.json({
       ok: true,
       message: "User loggedIn succesfully",
-      AccessToken: GenerateAccessToken(UserUID._id.toString()),
+      AccessToken: GenerateAccessToken(UpdateResult._id.toString()),
     });
   } catch (error) {
     response.status(500).json({
@@ -60,25 +54,18 @@ export async function LogInWithUserNameAndPassWord(request, response) {
 
     const { UserName, passWord } = request.body;
 
-    const queryResult = await UserModel.updateOne(
+    const UpdateResult = await UserModel.findOneAndUpdate(
       { userName: UserName, passWord: passWord },
-      { isActive: true }
+      { $set: { isActive: true } }
     ).exec();
 
-    if (queryResult.matchedCount === 0) throw new Error("User not found.");
-
-    const UserUID = await UserModel.findOne(
-      { userName: UserName, passWord: passWord },
-      "_id"
-    );
-
-    if (!UserUID)
-      throw new Error("An error ocurred while trying to get UserUID.");
+    if (!UpdateResult)
+      throw new Error("An error ocurred while trying to get User.");
 
     response.json({
       ok: true,
       message: "User logged In succesfully",
-      AccessToken: GenerateAccessToken(UserUID._id.toString()),
+      AccessToken: GenerateAccessToken(UpdateResult._id.toString()),
     });
   } catch (error) {
     response.status(500).json({
