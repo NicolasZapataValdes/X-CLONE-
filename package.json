@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "TargetTest": "node --experimental-vm-modules node_modules/jest/bin/jest.js Posts/Tests/postController.test.js",
     "dev": "node --watch index.js",
     "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
   },
