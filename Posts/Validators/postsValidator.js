@@ -10,11 +10,11 @@ export const validatePost = () => {
 
 export const validateGetPostById = () => {
   return [
+    ValidateToken,
     param("id")
       .isLength({ min: 20 })
       .withMessage("Param id does not have minimal length of 20"),
     param("id").notEmpty().withMessage("Param id is empty"),
-    ValidateToken,
   ];
 };
 

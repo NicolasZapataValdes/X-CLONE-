@@ -6,13 +6,16 @@ import {
   getPostById,
   restorePostById,
   updatePostContent,
+  GetPostsCreatedByFollowingUsers,
 } from "../Controllers/index.js";
 import { PostModel } from "../Models/index.js";
+import { UserModel } from "../../Users/Models/index.js";
 import { describe, expect, jest, test } from "@jest/globals";
 import supertest from "supertest";
 import { app } from "../../app.js";
 
 jest.mock("../../Posts/Models");
+jest.mock("../../Users/Models");
 
 describe("PostsController.js", () => {
   describe("getAllPosts", () => {
@@ -86,6 +89,98 @@ describe("PostsController.js", () => {
       await getAllPosts(req, res);
 
       expect(res.statusCode).toBe(500);
+    });
+  });
+
+  describe("Get Posts Created By Following Users", () => {
+    test("should return all post", async () => {
+      const mockPost = {
+        createdAt: "28/09/2024 14:57:35",
+        updatedAt: "29/09/2024 14:57:35",
+        deleted: false,
+        creatorUID: "123",
+        content: "Some text",
+      };
+
+      PostModel.find = jest.fn(() => ({
+        limit: jest.fn(() => ({
+          sort: jest.fn(() => ({
+            exec: jest.fn().mockResolvedValue(mockPost),
+          })),
+        })),
+      }));
+
+      UserModel.findById = jest.fn(() => ({
+        exec: jest
+          .fn()
+          .mockResolvedValue({ ok: true, followed: ["1234", "4567"] }),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      req.user = "1234";
+      await GetPostsCreatedByFollowingUsers(req, res);
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    test("Should return all post when properties LastPostID and LastPostCreatedAt are not falsy", async () => {
+      const mockPost = {
+        createdAt: "28/09/2024 14:57:35",
+        updatedAt: "29/09/2024 14:57:35",
+        deleted: false,
+        creatorUID: "123",
+        content: "Some text",
+      };
+
+      PostModel.find = jest.fn(() => ({
+        lte: jest.fn(() => ({
+          nor: jest.fn(() => ({
+            limit: jest.fn(() => ({
+              sort: jest.fn(() => ({
+                exec: jest.fn().mockResolvedValue(mockPost),
+              })),
+            })),
+          })),
+        })),
+      }));
+
+      UserModel.findById = jest.fn(() => ({
+        exec: jest
+          .fn()
+          .mockResolvedValue({ ok: true, followed: ["1234", "4567"] }),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      req.body.LastPostID = 1234;
+      req.body.LastPostCreatedAt = 1224;
+      req.user = "1234";
+      await GetPostsCreatedByFollowingUsers(req, res);
+    });
+
+    test("should return status 500 ", async () => {
+      UserModel.findById = jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue({ ok: false, followed: [] }),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      req.user = "1234";
+      await GetPostsCreatedByFollowingUsers(req, res);
+
+      expect(res.statusCode).toBe(500);
+    });
+
+    test("should reject request", async () => {
+      const result = await supertest(app)
+        .get("/api/v1/posts/following")
+        .send({});
+
+      expect(result.ok).toBe(false);
     });
   });
 
