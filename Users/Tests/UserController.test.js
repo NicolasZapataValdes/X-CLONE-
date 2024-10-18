@@ -22,7 +22,7 @@ describe("UserController.js", () => {
   describe("Unfollow User", () => {
     describe("When everything is ok", () => {
       test("should return ok true", async () => {
-        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+        UserModel.bulkWrite = jest.fn().mockResolvedValue({ modifiedCount: 2 });
 
         const request = createRequest();
         const response = createResponse();
@@ -35,7 +35,7 @@ describe("UserController.js", () => {
     });
     describe("When Follower not found", () => {
       test("should return ok false", async () => {
-        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 0 });
+        UserModel.bulkWrite = jest.fn().mockResolvedValue({ modifiedCount: 0 });
         const request = createRequest();
         const response = createResponse();
 
@@ -69,7 +69,7 @@ describe("UserController.js", () => {
     });
     describe("When something went wrong.", () => {
       test("should return ok false and error description", async () => {
-        UserModel.updateOne = jest
+        UserModel.bulkWrite = jest
           .fn()
           .mockRejectedValue(new Error("Something went wrong."));
 
@@ -86,7 +86,7 @@ describe("UserController.js", () => {
   describe("Follow User", () => {
     describe("When everything is ok", () => {
       test("should return ok true", async () => {
-        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+        UserModel.bulkWrite = jest.fn().mockResolvedValue({ modifiedCount: 2 });
 
         const request = createRequest();
         const response = createResponse();
@@ -117,7 +117,7 @@ describe("UserController.js", () => {
     });
     describe("When something went wrong.", () => {
       test("should return ok false and error description", async () => {
-        UserModel.updateOne = jest
+        UserModel.bulkWrite = jest
           .fn()
           .mockRejectedValue(new Error("Something went wrong."));
 
@@ -132,7 +132,7 @@ describe("UserController.js", () => {
     });
     describe("When Follower not found", () => {
       test("should return ok false", async () => {
-        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 0 });
+        UserModel.bulkWrite = jest.fn().mockResolvedValue({ modifiedCount: 0 });
         const request = createRequest();
         const response = createResponse();
 
