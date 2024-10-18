@@ -47,6 +47,7 @@ export async function getAllPosts(req, res) {
 export async function GetPostsCreatedByFollowingUsers(req, res) {
   try {
     const result = validationResult(req);
+
     if (!result.isEmpty()) {
       return res.status(400).json({
         ok: false,
@@ -54,10 +55,8 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
         errorDescription: result.array(),
       });
     }
-
     const followedUsers = await GetFollowedUsersIDByUID(req.user);
-
-    if (!followedUsers)
+    if (!followedUsers.ok)
       throw new Error("An error ocurred while trying to get Followed Users.");
 
     const { LastPostID, LastPostCreatedAt } = req.body;

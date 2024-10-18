@@ -41,11 +41,14 @@ export function ValidateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 
-    if (!token)
-      return res.status(401).json({
+    if (!token) {
+      res.status(401).json({
         ok: false,
         message: "Access Token in headers is empty.",
       });
+
+      return;
+    }
 
     jsonwebtoken.verify(
       DecryptJWTToken(token),

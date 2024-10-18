@@ -7,11 +7,11 @@ export async function GetFollowedUsersIDByUID(userIUD) {
     if (!userIUD) throw new Error("UserIUD is invalid.");
     return await UserModel.findById(userIUD, "followed").exec();
   } catch (error) {
-    response.status(500).json({
+    return {
       ok: false,
       message: "An error ocurred while trying to get followed array.",
       errorDescription: error?.message,
-    });
+    };
   }
 }
 
@@ -28,8 +28,8 @@ export async function Unfollow(request, response) {
 
       return;
     }
-    const { followerUid, followedUid } = request.body;
 
+    const { followerUid, followedUid } = request.body;
     const bulkOperations = [
       {
         updateOne: {
