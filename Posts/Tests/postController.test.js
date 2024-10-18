@@ -41,6 +41,38 @@ describe("PostsController.js", () => {
       expect(res.statusCode).toBe(200);
     });
 
+    test("Should return all post when properties LastPostID and LastPostCreatedAt are not falsy", async () => {
+      const mockPost = {
+        createdAt: "28/09/2024 14:57:35",
+        updatedAt: "29/09/2024 14:57:35",
+        deleted: false,
+        creatorUID: "123",
+        content: "Some text",
+      };
+
+      PostModel.find = jest.fn(() => ({
+        lte: jest.fn(() => ({
+          nor: jest.fn(() => ({
+            limit: jest.fn(() => ({
+              sort: jest.fn(() => ({
+                exec: jest.fn().mockResolvedValue(mockPost),
+              })),
+            })),
+          })),
+        })),
+      }));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      req.body.LastPostID = 1234;
+      req.body.LastPostCreatedAt = 1224;
+
+      await getAllPosts(req, res);
+
+      expect(res.statusCode).toBe(200);
+    });
+
     test("Should return an error", async () => {
       PostModel.find = jest.fn(() => ({
         limit: jest.fn(() => ({
