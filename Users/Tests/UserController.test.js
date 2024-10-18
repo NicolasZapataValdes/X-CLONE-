@@ -14,11 +14,31 @@ import {
   UpdateUser,
   DeleteUser,
   RestoreUser,
+  GetFollowedUsersIDByUID,
 } from "../Controllers/UserController.js";
 
 jest.mock("../../Users/Models/UserModel.js");
 
 describe("UserController.js", () => {
+  describe("Get Followed UsersID By UID", () => {
+    test("should return followed list array", async () => {
+      UserModel.findById = jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue({ followed: ["1234", "4567"] }),
+      }));
+
+      const result = await GetFollowedUsersIDByUID(123);
+      expect(result.followed).toEqual(["1234", "4567"]);
+    });
+    test("should return ok false", async () => {
+      UserModel.findById = jest.fn(() => ({
+        exec: jest.fn().mockRejectedValue(new Error("something went wrong.")),
+      }));
+
+      const result = await GetFollowedUsersIDByUID(123);
+      expect(result.ok).toBe(false);
+    });
+  });
+
   describe("Unfollow User", () => {
     describe("When everything is ok", () => {
       test("should return ok true", async () => {
@@ -104,6 +124,7 @@ describe("UserController.js", () => {
         });
 
         expect(response.ok).toBe(false);
+        expect(response.statusCode).toBe(401);
       });
     });
     describe("When followedUID is invalid", () => {

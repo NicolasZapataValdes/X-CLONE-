@@ -96,8 +96,6 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
       },
     });
   } catch (error) {
-    console.log(error);
-
     res.status(500).json({
       ok: false,
       message:
@@ -110,7 +108,6 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
 export async function getPostById(req, res) {
   try {
     const result = validationResult(req);
-    console.log(result);
 
     if (!result.isEmpty()) {
       return res.status(400).json({

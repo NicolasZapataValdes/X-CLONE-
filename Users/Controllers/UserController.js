@@ -28,8 +28,8 @@ export async function Unfollow(request, response) {
 
       return;
     }
-    const { followerUid, followedUid } = request.body;
 
+    const { followerUid, followedUid } = request.body;
     const bulkOperations = [
       {
         updateOne: {
