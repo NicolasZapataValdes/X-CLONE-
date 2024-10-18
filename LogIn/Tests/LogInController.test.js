@@ -17,12 +17,10 @@ describe("LogInController", () => {
     describe("When everything is ok", () => {
       test("should return ok true", async () => {
         const mockedUser = {
-          email: "ThomasParker24@correo.com",
-          passWord: "1234",
-          isActive: false,
+          _id: 1234,
         };
 
-        UserModel.updateOne = jest.fn(() => ({
+        UserModel.findOneAndUpdate = jest.fn(() => ({
           exec: jest.fn().mockResolvedValue(mockedUser),
         }));
 
@@ -68,8 +66,8 @@ describe("LogInController", () => {
     });
     describe("When no user match found", () => {
       test("should return ok false and error description", async () => {
-        UserModel.updateOne = jest.fn(() => ({
-          exec: jest.fn().mockResolvedValue({ matchedCount: 0 }),
+        UserModel.findOneAndUpdate = jest.fn(() => ({
+          exec: jest.fn().mockResolvedValue(undefined),
         }));
 
         const request = createRequest();
@@ -86,12 +84,10 @@ describe("LogInController", () => {
     describe("When everything is ok", () => {
       test("should return ok true", async () => {
         const mockedUser = {
-          UserName: "ThomasParker",
-          passWord: "1234",
-          isActive: false,
+          _id: 1234,
         };
 
-        UserModel.updateOne = jest.fn(() => ({
+        UserModel.findOneAndUpdate = jest.fn(() => ({
           exec: jest.fn().mockResolvedValue(mockedUser),
         }));
 
@@ -137,8 +133,8 @@ describe("LogInController", () => {
     });
     describe("When no user match found", () => {
       test("should return ok false and error description", async () => {
-        UserModel.updateOne = jest.fn(() => ({
-          exec: jest.fn().mockResolvedValue({ matchedCount: 0 }),
+        UserModel.findOneAndUpdate = jest.fn(() => ({
+          exec: jest.fn().mockResolvedValue(undefined),
         }));
 
         const request = createRequest();
