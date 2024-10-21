@@ -22,8 +22,7 @@ export async function LogInWithEmailAndPassWord(request, response) {
       { $set: { isActive: true } }
     ).exec();
 
-    if (!UpdateResult)
-      throw new Error("An error ocurred while trying to get User.");
+    if (!UpdateResult) throw new Error("User not found.");
 
     response.json({
       ok: true,
@@ -59,8 +58,7 @@ export async function LogInWithUserNameAndPassWord(request, response) {
       { $set: { isActive: true } }
     ).exec();
 
-    if (!UpdateResult)
-      throw new Error("An error ocurred while trying to get User.");
+    if (!UpdateResult) throw new Error("User not found.");
 
     response.json({
       ok: true,
