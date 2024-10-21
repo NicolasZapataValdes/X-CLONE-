@@ -4,7 +4,7 @@ import { logInRouter } from "./LogIn/Routes/index.js";
 import { postRouter } from "./Posts/Routes/index.js";
 import { userRouter } from "./Users/Routes/index.js";
 import { swaggerDocs } from "./docs.js";
-import { cors } from "cors";
+import cors from "cors";
 
 export const app = express();
 app.use(cors());
