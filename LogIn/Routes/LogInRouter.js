@@ -1,11 +1,11 @@
 import express from "express";
 export const logInRouter = express.Router();
+import { ValidateToken } from "../../Utils/Functions/index.js";
 
 import {
   LogInWithEmailAndPassWord,
   LogInWithUserNameAndPassWord,
-  LogOutWithEmailAndPassWord,
-  LogOutWithUserNameAndPassWord,
+  logOut,
 } from "../Controller/index.js";
 
 import {
@@ -23,13 +23,4 @@ logInRouter.post(
   ValidateUserNameAndPassWord(),
   LogInWithUserNameAndPassWord
 );
-logInRouter.delete(
-  "/Auth/Session/Email",
-  ValidateEmailAndPassWord(),
-  LogOutWithEmailAndPassWord
-);
-logInRouter.delete(
-  "/Auth/Session/UserName",
-  ValidateUserNameAndPassWord(),
-  LogOutWithUserNameAndPassWord
-);
+logInRouter.delete("/Auth/Session", ValidateToken, logOut);
