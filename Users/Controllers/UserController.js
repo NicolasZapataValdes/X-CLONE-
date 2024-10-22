@@ -297,25 +297,24 @@ export async function GetUserByUID(request, response) {
       return;
     }
 
-    console.log(request.user);
+    const user = await UserModel.findOne({ _id: request.user }).exec();
+    if (!user) throw new Error("User not found.");
 
-    const user = await UserModel.findById(request.user).exec();
-    if (!user || user.length === 0) throw new Error("User not found.");
-
+    const CreatedAt = new Date(user.CreatedAt).toLocaleDateString();
     response.status(200).json({
       ok: true,
       data: {
-        uid: user[0].id,
-        Name: user[0].name,
-        Email: user[0].email,
-        userName: user[0].userName,
-        CreatedAt: user[0].CreatedAt,
-        LastLogIn: user[0].LastLogIn,
-        isActive: user[0].isActive,
-        photo: user[0].photo,
-        deleted: user[0].deleted,
-        followers: user[0].followers?.length,
-        followed: user[0].followed?.length,
+        uid: user._id,
+        Name: user.name,
+        Email: user.email,
+        userName: user.userName,
+        CreatedAt: CreatedAt,
+        LastLogIn: user.LastLogIn,
+        isActive: user.isActive,
+        photo: user.photo,
+        deleted: user.deleted,
+        followers: user.followers?.length,
+        followed: user.followed?.length,
       },
     });
   } catch (error) {
