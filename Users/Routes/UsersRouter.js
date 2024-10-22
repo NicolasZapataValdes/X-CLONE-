@@ -1,4 +1,4 @@
-import express from 'express';
+import express from "express";
 export const userRouter = express.Router();
 
 import {
@@ -8,7 +8,7 @@ import {
   ValidateUID,
   ValidateUpdateUserRequest,
   ValidateFollowerUIDAndFollowedUID,
-} from '../Validators/index.js';
+} from "../Validators/index.js";
 
 import {
   GetUserByUserName,
@@ -21,23 +21,26 @@ import {
   GetFollowedUsersByUid,
   FollowUser,
   Unfollow,
-} from '../Controllers/index.js';
+  GetUserByUID,
+} from "../Controllers/index.js";
+import { ValidateToken } from "../../Utils/Functions/Functions.js";
 
-userRouter.get('/User/userName', ValidateUserName(), GetUserByUserName);
-userRouter.get('/User/Email', ValidateEmail(), GetUserByEmail);
-userRouter.post('/User', ValidateCreateUserRequest(), CreateUser);
-userRouter.patch('/User/Delete', ValidateUID(), DeleteUser);
-userRouter.patch('/User/Restore', ValidateUID(), RestoreUser);
-userRouter.patch('/User', ValidateUpdateUserRequest(), UpdateUser);
-userRouter.get('/User/Followers', ValidateUID(), GetFollowersByUid);
-userRouter.get('/User/Followed', ValidateUID(), GetFollowedUsersByUid);
+userRouter.get("/User", ValidateToken, GetUserByUID);
+userRouter.get("/User/userName", ValidateUserName(), GetUserByUserName);
+userRouter.get("/User/Email", ValidateEmail(), GetUserByEmail);
+userRouter.post("/User", ValidateCreateUserRequest(), CreateUser);
+userRouter.patch("/User/Delete", ValidateUID(), DeleteUser);
+userRouter.patch("/User/Restore", ValidateUID(), RestoreUser);
+userRouter.patch("/User", ValidateUpdateUserRequest(), UpdateUser);
+userRouter.get("/User/Followers", ValidateUID(), GetFollowersByUid);
+userRouter.get("/User/Followed", ValidateUID(), GetFollowedUsersByUid);
 userRouter.post(
-  '/User/Follow',
+  "/User/Follow",
   ValidateFollowerUIDAndFollowedUID(),
   FollowUser
 );
 userRouter.post(
-  '/User/UnFollow',
+  "/User/UnFollow",
   ValidateFollowerUIDAndFollowedUID(),
   Unfollow
 );
