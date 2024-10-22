@@ -39,7 +39,11 @@ export function GenerateAccessToken(PayLoad) {
 export function ValidateToken(req, res, next) {
   try {
     const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+    const token = authHeader
+      ? authHeader.includes(" ")
+        ? authHeader.split(" ")[1]
+        : authHeader
+      : undefined;
 
     if (!token) {
       res.status(401).json({
