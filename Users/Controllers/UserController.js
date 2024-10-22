@@ -1,5 +1,8 @@
 import { validationResult } from "express-validator";
-import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
+import {
+  GenerateAccessToken,
+  getParsedCurrentDateTime,
+} from "../../Utils/Functions/index.js";
 import { UserModel } from "../Models/index.js";
 
 export async function GetFollowedUsersIDByUID(userIUD) {
@@ -281,6 +284,49 @@ export async function GetUserByEmail(request, response) {
   }
 }
 
+export async function GetUserByUID(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    console.log(request.user);
+
+    const user = await UserModel.findById(request.user).exec();
+    if (!user || user.length === 0) throw new Error("User not found.");
+
+    response.status(200).json({
+      ok: true,
+      data: {
+        uid: user[0].id,
+        Name: user[0].name,
+        Email: user[0].email,
+        userName: user[0].userName,
+        CreatedAt: user[0].CreatedAt,
+        LastLogIn: user[0].LastLogIn,
+        isActive: user[0].isActive,
+        photo: user[0].photo,
+        deleted: user[0].deleted,
+        followers: user[0].followers?.length,
+        followed: user[0].followed?.length,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get user by ID",
+      errorDescription: error?.message,
+    });
+  }
+}
+
 export async function CreateUser(request, response) {
   try {
     const result = validationResult(request);
@@ -314,6 +360,7 @@ export async function CreateUser(request, response) {
     response.status(201).json({
       ok: true,
       message: "User created successfully.",
+      AccessToken: GenerateAccessToken(User._id),
     });
   } catch (error) {
     response.status(500).json({
