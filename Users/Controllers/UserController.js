@@ -360,7 +360,7 @@ export async function CreateUser(request, response) {
     response.status(201).json({
       ok: true,
       message: "User created successfully.",
-      AccessToken: GenerateAccessToken(User._id),
+      AccessToken: GenerateAccessToken(User._id.toString()),
     });
   } catch (error) {
     response.status(500).json({
