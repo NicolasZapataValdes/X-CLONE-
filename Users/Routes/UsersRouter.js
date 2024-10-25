@@ -18,7 +18,7 @@ import {
   RestoreUser,
   UpdateUser,
   GetFollowersByUid,
-  GetFollowedUsersByUid,
+  GetFollowedUsersByUID,
   FollowUser,
   Unfollow,
   GetUserByUID,
@@ -33,7 +33,7 @@ userRouter.patch("/User/Delete", ValidateUID(), DeleteUser);
 userRouter.patch("/User/Restore", ValidateUID(), RestoreUser);
 userRouter.patch("/User", ValidateUpdateUserRequest(), UpdateUser);
 userRouter.get("/User/Followers", ValidateUID(), GetFollowersByUid);
-userRouter.get("/User/Followed", ValidateUID(), GetFollowedUsersByUid);
+userRouter.get("/User/Followed", ValidateUID(), GetFollowedUsersByUID);
 userRouter.post(
   "/User/Follow",
   ValidateFollowerUIDAndFollowedUID(),

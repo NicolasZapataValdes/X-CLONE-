@@ -2,6 +2,8 @@ import { validationResult } from "express-validator";
 import { PostModel } from "../Models/index.js";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/Functions.js";
 import { GetFollowedUsersIDByUID } from "../../Users/Controllers/index.js";
+import { NodeCache } from "../../app.js";
+import { cacheTypes } from "../Constants/index.js";
 
 export async function getAllPosts(req, res) {
   try {
@@ -9,15 +11,26 @@ export async function getAllPosts(req, res) {
 
     const { LastPostID, LastPostCreatedAt } = req.body;
 
-    if (LastPostID && LastPostCreatedAt) {
-      queryResult = await PostModel.find()
-        .lte("createdAt", LastPostCreatedAt)
-        .nor([{ _id: LastPostID }])
-        .limit(10)
-        .sort("-createdAt")
-        .exec();
+    const cacheKey = `${cacheTypes.getAllPost}${LastPostID}`;
+
+    if (NodeCache.has(cacheKey)) {
+      queryResult = NodeCache.get(cacheKey);
     } else {
-      queryResult = await PostModel.find().limit(10).sort("-createdAt").exec();
+      if (LastPostID && LastPostCreatedAt) {
+        queryResult = await PostModel.find()
+          .lte("createdAt", LastPostCreatedAt)
+          .nor([{ _id: LastPostID }])
+          .limit(10)
+          .sort("-createdAt")
+          .exec();
+      } else {
+        queryResult = await PostModel.find()
+          .limit(10)
+          .sort("-createdAt")
+          .exec();
+      }
+
+      NodeCache.set(cacheKey, queryResult);
     }
 
     res.status(200).json({
@@ -56,28 +69,37 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
       });
     }
     const followedUsers = await GetFollowedUsersIDByUID(req.user);
-    if (!followedUsers.ok)
+    if (!followedUsers)
       throw new Error("An error ocurred while trying to get Followed Users.");
 
     const { LastPostID, LastPostCreatedAt } = req.body;
 
+    const cacheKey = `${cacheTypes.GetPostsCreatedByFollowingUsers}${LastPostID}`;
+
     let queryResult = [];
-    if (LastPostID && LastPostCreatedAt) {
-      queryResult = await PostModel.find({
-        creatorUID: { $in: followedUsers.followed },
-      })
-        .lte("createdAt", LastPostCreatedAt)
-        .nor([{ _id: LastPostID }])
-        .limit(10)
-        .sort("-createdAt")
-        .exec();
+
+    if (NodeCache.has(cacheKey)) {
+      queryResult = NodeCache.get(cacheKey);
     } else {
-      queryResult = await PostModel.find({
-        creatorUID: { $in: followedUsers.followed },
-      })
-        .limit(10)
-        .sort("-createdAt")
-        .exec();
+      if (LastPostID && LastPostCreatedAt) {
+        queryResult = await PostModel.find({
+          creatorUID: { $in: followedUsers.followed },
+        })
+          .lte("createdAt", LastPostCreatedAt)
+          .nor([{ _id: LastPostID }])
+          .limit(10)
+          .sort("-createdAt")
+          .exec();
+      } else {
+        queryResult = await PostModel.find({
+          creatorUID: { $in: followedUsers.followed },
+        })
+          .limit(10)
+          .sort("-createdAt")
+          .exec();
+      }
+
+      NodeCache.set(cacheKey, queryResult);
     }
 
     return res.status(200).json({
@@ -96,6 +118,7 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
       },
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       ok: false,
       message:
@@ -118,11 +141,24 @@ export async function getPostById(req, res) {
     }
 
     const { id } = req.params;
+
+    const cacheKey = `${cacheTypes.getPostById}${id}`;
+
+    if (NodeCache.has(cacheKey)) {
+      const cachedData = NodeCache.get(cacheKey);
+      return res.status(200).json({
+        ok: true,
+        cachedData,
+      });
+    }
+
     const post = await PostModel.findById(id).exec();
 
     if (!post || post.length === 0) {
       return res.status(404).json({ ok: false, message: "Post not found" });
     }
+
+    NodeCache.set(cacheKey, post);
 
     res.status(200).json({
       ok: true,
