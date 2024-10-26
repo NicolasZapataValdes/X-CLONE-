@@ -2,82 +2,90 @@ import { validationResult } from "express-validator";
 import { PostModel } from "../Models/index.js";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/Functions.js";
 import { GetFollowedUsersIDByUID } from "../../Users/Controllers/index.js";
+import { NodeCache } from "../../app.js";
+import { cacheTypes } from "../Constants/index.js";
 
 export async function getAllPosts(req, res) {
   try {
     let queryResult = [];
 
     const { LastPostID, LastPostCreatedAt } = req.body;
+    const cacheKey = `${cacheTypes.getAllPost}${LastPostID}`;
 
-    if (LastPostID && LastPostCreatedAt) {
-      queryResult = await PostModel.aggregate([
-        {
-          $match: {
-            createdAt: { $lte: LastPostCreatedAt },
-            _id: { $ne: LastPostID },
-          },
-        },
-        { $sort: { createdAt: -1 } },
-        { $limit: 10 },
-        {
-          $lookup: {
-            from: "users",
-            let: { creatorUID: { $toObjectId: "$creatorUID" } },
-            pipeline: [
-              { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
-              { $project: { userName: 1, name: 1, photo: 1 } },
-            ],
-            as: "userInfo",
-          },
-        },
-        { $unwind: "$userInfo" },
-        {
-          $project: {
-            _id: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            deleted: 1,
-            content: 1,
-            "userInfo.userName": 1,
-            "userInfo.name": 1,
-            "userInfo.photo": 1,
-          },
-        },
-      ]);
+    if (NodeCache.has(cacheKey)) {
+      queryResult = NodeCache.get(cacheKey);
     } else {
-      queryResult = await PostModel.aggregate([
-        { $match: { deleted: false } },
-        { $sort: { createdAt: -1 } },
-        { $limit: 10 },
-        {
-          $lookup: {
-            from: "users",
-            let: { creatorUID: { $toObjectId: "$creatorUID" } },
-            pipeline: [
-              { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
-              { $project: { userName: 1, name: 1, photo: 1 } },
-            ],
-            as: "userInfo",
+      if (LastPostID && LastPostCreatedAt) {
+        queryResult = await PostModel.aggregate([
+          {
+            $match: {
+              createdAt: { $lte: LastPostCreatedAt },
+              _id: { $ne: LastPostID },
+            },
           },
-        },
-        {
-          $unwind: "$userInfo",
-        },
-        {
-          $project: {
-            _id: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            deleted: 1,
-            content: 1,
-            "userInfo.userName": 1,
-            "userInfo.name": 1,
-            "userInfo.photo": 1,
+          { $sort: { createdAt: -1 } },
+          { $limit: 10 },
+          {
+            $lookup: {
+              from: "users",
+              let: { creatorUID: { $toObjectId: "$creatorUID" } },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+                { $project: { userName: 1, name: 1, photo: 1 } },
+              ],
+              as: "userInfo",
+            },
           },
-        },
-      ]);
+          { $unwind: "$userInfo" },
+          {
+            $project: {
+              _id: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              deleted: 1,
+              content: 1,
+              "userInfo.userName": 1,
+              "userInfo.name": 1,
+              "userInfo.photo": 1,
+            },
+          },
+        ]);
+      } else {
+        queryResult = await PostModel.aggregate([
+          { $match: { deleted: false } },
+          { $sort: { createdAt: -1 } },
+          { $limit: 10 },
+          {
+            $lookup: {
+              from: "users",
+              let: { creatorUID: { $toObjectId: "$creatorUID" } },
+              pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+                { $project: { userName: 1, name: 1, photo: 1 } },
+              ],
+              as: "userInfo",
+            },
+          },
+          {
+            $unwind: "$userInfo",
+          },
+          {
+            $project: {
+              _id: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              deleted: 1,
+              content: 1,
+              "userInfo.userName": 1,
+              "userInfo.name": 1,
+              "userInfo.photo": 1,
+            },
+          },
+        ]);
+      }
     }
 
+    NodeCache.set(cacheKey, queryResult);
     res.status(200).json({
       ok: true,
       length: queryResult.length,
@@ -119,23 +127,32 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
 
     const { LastPostID, LastPostCreatedAt } = req.body;
 
+    const cacheKey = `${cacheTypes.GetPostsCreatedByFollowingUsers}${LastPostID}`;
+
     let queryResult = [];
-    if (LastPostID && LastPostCreatedAt) {
-      queryResult = await PostModel.find({
-        creatorUID: { $in: followedUsers.followed },
-      })
-        .lte("createdAt", LastPostCreatedAt)
-        .nor([{ _id: LastPostID }])
-        .limit(10)
-        .sort("-createdAt")
-        .exec();
+
+    if (NodeCache.has(cacheKey)) {
+      queryResult = NodeCache.get(cacheKey);
     } else {
-      queryResult = await PostModel.find({
-        creatorUID: { $in: followedUsers.followed },
-      })
-        .limit(10)
-        .sort("-createdAt")
-        .exec();
+      if (LastPostID && LastPostCreatedAt) {
+        queryResult = await PostModel.find({
+          creatorUID: { $in: followedUsers.followed },
+        })
+          .lte("createdAt", LastPostCreatedAt)
+          .nor([{ _id: LastPostID }])
+          .limit(10)
+          .sort("-createdAt")
+          .exec();
+      } else {
+        queryResult = await PostModel.find({
+          creatorUID: { $in: followedUsers.followed },
+        })
+          .limit(10)
+          .sort("-createdAt")
+          .exec();
+      }
+
+      NodeCache.set(cacheKey, queryResult);
     }
 
     return res.status(200).json({
@@ -154,6 +171,7 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
       },
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       ok: false,
       message:
@@ -176,11 +194,24 @@ export async function getPostById(req, res) {
     }
 
     const { id } = req.params;
+
+    const cacheKey = `${cacheTypes.getPostById}${id}`;
+
+    if (NodeCache.has(cacheKey)) {
+      const cachedData = NodeCache.get(cacheKey);
+      return res.status(200).json({
+        ok: true,
+        cachedData,
+      });
+    }
+
     const post = await PostModel.findById(id).exec();
 
     if (!post || post.length === 0) {
       return res.status(404).json({ ok: false, message: "Post not found" });
     }
+
+    NodeCache.set(cacheKey, post);
 
     res.status(200).json({
       ok: true,

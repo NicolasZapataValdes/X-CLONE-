@@ -4,11 +4,21 @@ import {
   getParsedCurrentDateTime,
 } from "../../Utils/Functions/index.js";
 import { UserModel } from "../Models/index.js";
+import { NodeCache } from "../../app.js";
+import { Types } from "../Constants/index.js";
 
 export async function GetFollowedUsersIDByUID(userIUD) {
   try {
     if (!userIUD) throw new Error("UserIUD is invalid.");
-    return await UserModel.findById(userIUD, "followed").exec();
+    const CacheKey = `${Types.GetFollowedUsersIDByUID}${userIUD}`;
+
+    if (NodeCache.has(CacheKey)) {
+      return NodeCache.get(CacheKey);
+    } else {
+      const QueryResult = await UserModel.findById(userIUD, "followed").exec();
+      NodeCache.set(CacheKey, QueryResult);
+      return QueryResult;
+    }
   } catch (error) {
     return {
       ok: false,
@@ -128,6 +138,18 @@ export async function GetFollowersByUid(request, response) {
     }
 
     const { uid } = request.body;
+    const CacheKey = `${Types.GetFollowersByUid}${uid}`;
+
+    if (NodeCache.has(CacheKey)) {
+      const CachedData = NodeCache.get(CacheKey);
+      return response.status(200).json({
+        ok: true,
+        data: {
+          followers: CachedData,
+          lenght: CachedData.length,
+        },
+      });
+    }
 
     const user = await UserModel.find({ _id: uid }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
@@ -143,6 +165,7 @@ export async function GetFollowersByUid(request, response) {
       photo: U.photo,
     }));
 
+    NodeCache.set(CacheKey, jsonResponse);
     response.status(200).json({
       ok: true,
       data: {
@@ -159,7 +182,7 @@ export async function GetFollowersByUid(request, response) {
   }
 }
 
-export async function GetFollowedUsersByUid(request, response) {
+export async function GetFollowedUsersByUID(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -173,6 +196,18 @@ export async function GetFollowedUsersByUid(request, response) {
     }
 
     const { uid } = request.body;
+    const CacheKey = `${Types.GetFollowedUsersByUID}${uid}`;
+
+    if (NodeCache.has(CacheKey)) {
+      const CachedData = NodeCache.get(CacheKey);
+      return response.status(200).json({
+        ok: true,
+        data: {
+          followed: CachedData,
+          lenght: CachedData.length,
+        },
+      });
+    }
 
     const user = await UserModel.find({ _id: uid }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
@@ -188,6 +223,7 @@ export async function GetFollowedUsersByUid(request, response) {
       photo: U.photo,
     }));
 
+    NodeCache.set(CacheKey, jsonResponse);
     response.status(200).json({
       ok: true,
       data: {
@@ -218,9 +254,30 @@ export async function GetUserByUserName(request, response) {
     }
 
     const { UserName } = request.body;
+    const CacheKey = `${Types.GetUserByUserName}${UserName}`;
+
+    if (NodeCache.has(CacheKey)) {
+      const CachedData = NodeCache.get(CacheKey);
+      return response.status(200).json({
+        ok: true,
+        data: {
+          uid: CachedData[0].id,
+          Name: CachedData[0].name,
+          Email: CachedData[0].email,
+          userName: CachedData[0].userName,
+          CreatedAt: CachedData[0].CreatedAt,
+          LastLogIn: CachedData[0].LastLogIn,
+          isActive: CachedData[0].isActive,
+          photo: CachedData[0].photo,
+          deleted: CachedData[0].deleted,
+        },
+      });
+    }
+
     const user = await UserModel.find({ userName: UserName }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
+    NodeCache.set(CacheKey, user);
     response.status(200).json({
       ok: true,
       data: {
@@ -258,9 +315,30 @@ export async function GetUserByEmail(request, response) {
     }
 
     const { Email } = request.body;
+    const CacheKey = `${Types.GetUserByEmail}${Email}`;
+
+    if (NodeCache.has(CacheKey)) {
+      const CachedData = NodeCache.get(CacheKey);
+      return response.status(200).json({
+        ok: true,
+        data: {
+          uid: CachedData[0].id,
+          Name: CachedData[0].name,
+          Email: CachedData[0].email,
+          userName: CachedData[0].userName,
+          CreatedAt: CachedData[0].CreatedAt,
+          LastLogIn: CachedData[0].LastLogIn,
+          isActive: CachedData[0].isActive,
+          photo: CachedData[0].photo,
+          deleted: CachedData[0].deleted,
+        },
+      });
+    }
+
     const user = await UserModel.find({ email: Email }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
+    NodeCache.set(CacheKey, user);
     response.status(200).json({
       ok: true,
       data: {
@@ -295,6 +373,30 @@ export async function GetUserByUID(request, response) {
       });
 
       return;
+    }
+
+    const CacheKey = `${Types.GetUserByUID}${request.user}`;
+
+    if (NodeCache.has(CacheKey)) {
+      const CachedData = NodeCache.get(CacheKey);
+
+      const CreatedAt = new Date(CachedData.CreatedAt).toLocaleDateString();
+      return response.status(200).json({
+        ok: true,
+        data: {
+          uid: CachedData._id,
+          Name: CachedData.name,
+          Email: CachedData.email,
+          userName: CachedData.userName,
+          CreatedAt: CreatedAt,
+          LastLogIn: CachedData.LastLogIn,
+          isActive: CachedData.isActive,
+          photo: CachedData.photo,
+          deleted: CachedData.deleted,
+          followers: CachedData.followers?.length,
+          followed: CachedData.followed?.length,
+        },
+      });
     }
 
     const user = await UserModel.findOne({ _id: request.user }).exec();
