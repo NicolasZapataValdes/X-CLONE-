@@ -28,6 +28,9 @@ export async function LogInWithEmailAndPassWord(request, response) {
       ok: true,
       message: "User loggedIn succesfully",
       AccessToken: GenerateAccessToken(UpdateResult._id.toString()),
+      Photo: UpdateResult.photo,
+      Name: UpdateResult.name,
+      UserName: UpdateResult.userName,
     });
   } catch (error) {
     response.status(500).json({
@@ -64,6 +67,9 @@ export async function LogInWithUserNameAndPassWord(request, response) {
       ok: true,
       message: "User logged In succesfully",
       AccessToken: GenerateAccessToken(UpdateResult._id.toString()),
+      Photo: UpdateResult.photo,
+      Name: UpdateResult.name,
+      UserName: UpdateResult.userName,
     });
   } catch (error) {
     response.status(500).json({
