@@ -240,11 +240,13 @@ export async function getPostById(req, res) {
       return res.status(404).json({ ok: false, message: "Post not found" });
     }
 
-    NodeCache.set(cacheKey, post);
+    const data = post[0];
+
+    NodeCache.set(cacheKey, data);
 
     res.status(200).json({
       ok: true,
-      post,
+      data,
     });
   } catch (error) {
     res.status(500).json({
