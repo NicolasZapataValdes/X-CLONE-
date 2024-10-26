@@ -12,80 +12,74 @@ export async function getAllPosts(req, res) {
     const { LastPostID, LastPostCreatedAt } = req.body;
     const cacheKey = `${cacheTypes.getAllPost}${LastPostID}`;
 
-    if (NodeCache.has(cacheKey)) {
-      queryResult = NodeCache.get(cacheKey);
+    if (LastPostID && LastPostCreatedAt) {
+      queryResult = await PostModel.aggregate([
+        {
+          $match: {
+            createdAt: { $lte: LastPostCreatedAt },
+            _id: { $ne: LastPostID },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            let: { creatorUID: { $toObjectId: "$creatorUID" } },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+              { $project: { userName: 1, name: 1, photo: 1 } },
+            ],
+            as: "userInfo",
+          },
+        },
+        { $unwind: "$userInfo" },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            deleted: 1,
+            content: 1,
+            "userInfo.userName": 1,
+            "userInfo.name": 1,
+            "userInfo.photo": 1,
+          },
+        },
+      ]);
     } else {
-      if (LastPostID && LastPostCreatedAt) {
-        queryResult = await PostModel.aggregate([
-          {
-            $match: {
-              createdAt: { $lte: LastPostCreatedAt },
-              _id: { $ne: LastPostID },
-            },
+      queryResult = await PostModel.aggregate([
+        { $match: { deleted: false } },
+        { $sort: { createdAt: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            let: { creatorUID: { $toObjectId: "$creatorUID" } },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+              { $project: { userName: 1, name: 1, photo: 1 } },
+            ],
+            as: "userInfo",
           },
-          { $sort: { createdAt: -1 } },
-          { $limit: 10 },
-          {
-            $lookup: {
-              from: "users",
-              let: { creatorUID: { $toObjectId: "$creatorUID" } },
-              pipeline: [
-                { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
-                { $project: { userName: 1, name: 1, photo: 1 } },
-              ],
-              as: "userInfo",
-            },
+        },
+        {
+          $unwind: "$userInfo",
+        },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            deleted: 1,
+            content: 1,
+            "userInfo.userName": 1,
+            "userInfo.name": 1,
+            "userInfo.photo": 1,
           },
-          { $unwind: "$userInfo" },
-          {
-            $project: {
-              _id: 1,
-              createdAt: 1,
-              updatedAt: 1,
-              deleted: 1,
-              content: 1,
-              "userInfo.userName": 1,
-              "userInfo.name": 1,
-              "userInfo.photo": 1,
-            },
-          },
-        ]);
-      } else {
-        queryResult = await PostModel.aggregate([
-          { $match: { deleted: false } },
-          { $sort: { createdAt: -1 } },
-          { $limit: 10 },
-          {
-            $lookup: {
-              from: "users",
-              let: { creatorUID: { $toObjectId: "$creatorUID" } },
-              pipeline: [
-                { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
-                { $project: { userName: 1, name: 1, photo: 1 } },
-              ],
-              as: "userInfo",
-            },
-          },
-          {
-            $unwind: "$userInfo",
-          },
-          {
-            $project: {
-              _id: 1,
-              createdAt: 1,
-              updatedAt: 1,
-              deleted: 1,
-              content: 1,
-              "userInfo.userName": 1,
-              "userInfo.name": 1,
-              "userInfo.photo": 1,
-            },
-          },
-        ]);
-      }
+        },
+      ]);
     }
-
-    NodeCache.set(cacheKey, queryResult);
     res.status(200).json({
       ok: true,
       length: queryResult.length,
@@ -251,6 +245,13 @@ export async function createPost(req, res) {
     res.status(201).json({
       ok: true,
       message: "Post created successfully",
+      data: {
+        _id: newPost,
+        createdAt: newPost.createdAt,
+        updatedAt: newPost.updatedAt,
+        deleted: false,
+        content: newPost.content,
+      },
     });
   } catch (error) {
     res.status(500).json({
