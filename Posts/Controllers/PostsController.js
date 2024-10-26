@@ -4,6 +4,7 @@ import { getParsedCurrentDateTime } from "../../Utils/Functions/Functions.js";
 import { GetFollowedUsersIDByUID } from "../../Users/Controllers/index.js";
 import { NodeCache } from "../../app.js";
 import { cacheTypes } from "../Constants/index.js";
+import mongoose from "mongoose";
 
 export async function getAllPosts(req, res) {
   try {
@@ -199,7 +200,41 @@ export async function getPostById(req, res) {
       });
     }
 
-    const post = await PostModel.findById(id).exec();
+    const post = await PostModel.aggregate([
+      {
+        $match: {
+          $expr: {
+            $eq: [{ $toString: "$_id" }, id],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { creatorUID: { $toObjectId: "$creatorUID" } },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+            { $project: { userName: 1, name: 1, photo: 1 } },
+          ],
+          as: "userInfo",
+        },
+      },
+      {
+        $unwind: "$userInfo",
+      },
+      {
+        $project: {
+          _id: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          deleted: 1,
+          content: 1,
+          "userInfo.userName": 1,
+          "userInfo.name": 1,
+          "userInfo.photo": 1,
+        },
+      },
+    ]);
 
     if (!post || post.length === 0) {
       return res.status(404).json({ ok: false, message: "Post not found" });
