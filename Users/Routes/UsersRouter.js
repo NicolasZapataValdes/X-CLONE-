@@ -32,8 +32,8 @@ userRouter.post("/User", ValidateCreateUserRequest(), CreateUser);
 userRouter.patch("/User/Delete", ValidateUID(), DeleteUser);
 userRouter.patch("/User/Restore", ValidateUID(), RestoreUser);
 userRouter.patch("/User", ValidateUpdateUserRequest(), UpdateUser);
-userRouter.get("/User/Followers", ValidateUID(), GetFollowersByUid);
-userRouter.get("/User/Followed", ValidateUID(), GetFollowedUsersByUID);
+userRouter.get("/User/Followers", ValidateToken, GetFollowersByUid);
+userRouter.get("/User/Followed", ValidateToken, GetFollowedUsersByUID);
 userRouter.post(
   "/User/Follow",
   ValidateFollowerUIDAndFollowedUID(),

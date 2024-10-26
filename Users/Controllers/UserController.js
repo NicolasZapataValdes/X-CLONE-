@@ -137,8 +137,7 @@ export async function GetFollowersByUid(request, response) {
       return;
     }
 
-    const { uid } = request.body;
-    const CacheKey = `${Types.GetFollowersByUid}${uid}`;
+    const CacheKey = `${Types.GetFollowersByUid}${request.user}`;
 
     if (NodeCache.has(CacheKey)) {
       const CachedData = NodeCache.get(CacheKey);
@@ -151,7 +150,7 @@ export async function GetFollowersByUid(request, response) {
       });
     }
 
-    const user = await UserModel.find({ _id: uid }).exec();
+    const user = await UserModel.find({ _id: request.user }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
     const followerUsers = await UserModel.find({
@@ -195,8 +194,7 @@ export async function GetFollowedUsersByUID(request, response) {
       return;
     }
 
-    const { uid } = request.body;
-    const CacheKey = `${Types.GetFollowedUsersByUID}${uid}`;
+    const CacheKey = `${Types.GetFollowedUsersByUID}${request.user}`;
 
     if (NodeCache.has(CacheKey)) {
       const CachedData = NodeCache.get(CacheKey);
@@ -209,7 +207,7 @@ export async function GetFollowedUsersByUID(request, response) {
       });
     }
 
-    const user = await UserModel.find({ _id: uid }).exec();
+    const user = await UserModel.find({ _id: request.user }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
     const followedUsers = await UserModel.find({
