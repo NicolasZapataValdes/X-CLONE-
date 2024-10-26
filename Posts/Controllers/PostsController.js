@@ -196,7 +196,7 @@ export async function getPostById(req, res) {
       const cachedData = NodeCache.get(cacheKey);
       return res.status(200).json({
         ok: true,
-        cachedData,
+        data: cachedData,
       });
     }
 
@@ -283,7 +283,7 @@ export async function createPost(req, res) {
       ok: true,
       message: "Post created successfully",
       data: {
-        _id: newPost,
+        _id: newPost._id.toString(),
         createdAt: newPost.createdAt,
         updatedAt: newPost.updatedAt,
         deleted: false,
