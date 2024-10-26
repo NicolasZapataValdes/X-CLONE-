@@ -10,14 +10,72 @@ export async function getAllPosts(req, res) {
     const { LastPostID, LastPostCreatedAt } = req.body;
 
     if (LastPostID && LastPostCreatedAt) {
-      queryResult = await PostModel.find()
-        .lte("createdAt", LastPostCreatedAt)
-        .nor([{ _id: LastPostID }])
-        .limit(10)
-        .sort("-createdAt")
-        .exec();
+      queryResult = await PostModel.aggregate([
+        {
+          $match: {
+            createdAt: { $lte: LastPostCreatedAt },
+            _id: { $ne: LastPostID },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            let: { creatorUID: { $toObjectId: "$creatorUID" } },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+              { $project: { userName: 1, name: 1, photo: 1 } },
+            ],
+            as: "userInfo",
+          },
+        },
+        { $unwind: "$userInfo" },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            deleted: 1,
+            content: 1,
+            "userInfo.userName": 1,
+            "userInfo.name": 1,
+            "userInfo.photo": 1,
+          },
+        },
+      ]);
     } else {
-      queryResult = await PostModel.find().limit(10).sort("-createdAt").exec();
+      queryResult = await PostModel.aggregate([
+        { $match: { deleted: false } },
+        { $sort: { createdAt: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            let: { creatorUID: { $toObjectId: "$creatorUID" } },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+              { $project: { userName: 1, name: 1, photo: 1 } },
+            ],
+            as: "userInfo",
+          },
+        },
+        {
+          $unwind: "$userInfo",
+        },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            deleted: 1,
+            content: 1,
+            "userInfo.userName": 1,
+            "userInfo.name": 1,
+            "userInfo.photo": 1,
+          },
+        },
+      ]);
     }
 
     res.status(200).json({
@@ -56,7 +114,7 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
       });
     }
     const followedUsers = await GetFollowedUsersIDByUID(req.user);
-    if (!followedUsers.ok)
+    if (!followedUsers)
       throw new Error("An error ocurred while trying to get Followed Users.");
 
     const { LastPostID, LastPostCreatedAt } = req.body;
@@ -83,7 +141,7 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
     return res.status(200).json({
       ok: true,
       length: queryResult.length,
-      data: queryResult,
+      posts: queryResult,
       lastPostInfo: {
         id:
           queryResult.length > 0
