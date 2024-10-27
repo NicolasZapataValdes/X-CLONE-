@@ -23,10 +23,16 @@ export function ValidateUID() {
   ];
 }
 
-export function ValidateFollowerUIDAndFollowedUID() {
+export function ValidateFollowedUID() {
   return [
-    body("followerUid").notEmpty().withMessage("Param followerUid is empty."),
     body("followedUid").notEmpty().withMessage("Param followedUid is empty."),
+    ValidateToken,
+  ];
+}
+
+export function ValidateFollowerUID() {
+  return [
+    body("followerUid").notEmpty().withMessage("Param followedUid is empty."),
     ValidateToken,
   ];
 }
