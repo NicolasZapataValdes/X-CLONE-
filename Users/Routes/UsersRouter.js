@@ -7,7 +7,8 @@ import {
   ValidateCreateUserRequest,
   ValidateUID,
   ValidateUpdateUserRequest,
-  ValidateFollowerUIDAndFollowedUID,
+  ValidateFollowedUID,
+  ValidateFollowerUID,
 } from "../Validators/index.js";
 
 import {
@@ -17,8 +18,8 @@ import {
   DeleteUser,
   RestoreUser,
   UpdateUser,
-  GetFollowersByUid,
-  GetFollowedUsersByUID,
+  GetFollowersByUserName,
+  GetFollowedUsersByUserName,
   FollowUser,
   Unfollow,
   GetUserByUID,
@@ -36,15 +37,15 @@ userRouter.post("/User", ValidateCreateUserRequest(), CreateUser);
 userRouter.patch("/User/Delete", ValidateUID(), DeleteUser);
 userRouter.patch("/User/Restore", ValidateUID(), RestoreUser);
 userRouter.patch("/User", ValidateUpdateUserRequest(), UpdateUser);
-userRouter.get("/User/Followers", ValidateToken, GetFollowersByUid);
-userRouter.get("/User/Followed", ValidateToken, GetFollowedUsersByUID);
-userRouter.post(
-  "/User/Follow",
-  ValidateFollowerUIDAndFollowedUID(),
-  FollowUser
+userRouter.get(
+  "/User/Followers/:UserName",
+  ValidateToken,
+  GetFollowersByUserName
 );
-userRouter.post(
-  "/User/UnFollow",
-  ValidateFollowerUIDAndFollowedUID(),
-  Unfollow
+userRouter.get(
+  "/User/Followed/:UserName",
+  ValidateToken,
+  GetFollowedUsersByUserName
 );
+userRouter.post("/User/Follow", ValidateFollowedUID(), FollowUser);
+userRouter.post("/User/UnFollow", ValidateFollowedUID(), Unfollow);
