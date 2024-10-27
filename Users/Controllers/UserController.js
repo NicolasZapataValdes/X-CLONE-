@@ -237,6 +237,56 @@ export async function GetFollowedUsersByUID(request, response) {
   }
 }
 
+export async function GetFollowedUsersByUserName(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { UserName } = request.params;
+
+    const user = await UserModel.findOne(
+      { userName: UserName },
+      "followed"
+    ).exec();
+
+    if (!user || user.length === 0) throw new Error("User not found.");
+
+    const followedUsers = await UserModel.find({
+      _id: { $in: user.followed },
+    });
+
+    const jsonResponse = followedUsers.map((U) => ({
+      uid: U._id,
+      name: U.name,
+      userName: U.userName,
+      photo: U.photo,
+    }));
+
+    jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
+    response.status(200).json({
+      ok: true,
+      data: {
+        followed: jsonResponse,
+        lenght: jsonResponse.length,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followed users",
+      errorDescription: error?.message,
+    });
+  }
+}
+
 export async function GetUserByUserName(request, response) {
   try {
     const result = validationResult(request);
