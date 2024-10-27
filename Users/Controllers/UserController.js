@@ -276,18 +276,21 @@ export async function GetUserByUserName(request, response) {
     if (!user || user.length === 0) throw new Error("User not found.");
 
     // NodeCache.set(CacheKey, user);
+    const CreatedAt = new Date(user[0].CreatedAt).toLocaleDateString();
     response.status(200).json({
       ok: true,
       data: {
-        uid: user[0].id,
+        uid: user[0]._id,
         Name: user[0].name,
         Email: user[0].email,
         userName: user[0].userName,
-        CreatedAt: user[0].CreatedAt,
+        CreatedAt: CreatedAt,
         LastLogIn: user[0].LastLogIn,
         isActive: user[0].isActive,
         photo: user[0].photo,
         deleted: user[0].deleted,
+        followers: user[0].followers?.length,
+        followed: user[0].followed?.length,
       },
     });
   } catch (error) {
