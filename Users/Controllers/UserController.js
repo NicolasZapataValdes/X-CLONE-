@@ -179,6 +179,55 @@ export async function GetFollowersByUid(request, response) {
   }
 }
 
+export async function GetFollowersByUserName(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { UserName } = request.params;
+
+    const user = await UserModel.findOne({ userName: UserName }).exec();
+
+    if (!user || user.length === 0) throw new Error("User not found.");
+
+    const followerUsers = await UserModel.find({
+      _id: { $in: user.followers },
+    });
+
+    const jsonResponse = followerUsers.map((U) => ({
+      uid: U._id,
+      name: U.name,
+      userName: U.userName,
+      photo: U.photo,
+      AlreadyFollowUser: user.followed.includes(U._id.toString()),
+    }));
+
+    jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
+    response.status(200).json({
+      ok: true,
+      data: {
+        followers: jsonResponse,
+        lenght: jsonResponse.length,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followers",
+      errorDescription: error?.message,
+    });
+  }
+}
+
 export async function GetFollowedUsersByUID(request, response) {
   try {
     const result = validationResult(request);
