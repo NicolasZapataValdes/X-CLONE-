@@ -250,7 +250,8 @@ export async function GetUserByUserName(request, response) {
       return;
     }
 
-    const { UserName } = request.body;
+    const { UserName } = request.params;
+
     const CacheKey = `${Types.GetUserByUserName}${UserName}`;
 
     // if (NodeCache.has(CacheKey)) {

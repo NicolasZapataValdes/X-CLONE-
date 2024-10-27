@@ -1,9 +1,9 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import { ValidateToken } from "../../Utils/Functions/index.js";
 
 export function ValidateUserName() {
   return [
-    body("UserName").notEmpty().withMessage("Param UserName is empty."),
+    param("UserName").notEmpty().withMessage("Param UserName is empty."),
     ValidateToken,
   ];
 }

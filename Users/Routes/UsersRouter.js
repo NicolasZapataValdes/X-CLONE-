@@ -27,7 +27,11 @@ import {
 import { ValidateToken } from "../../Utils/Functions/Functions.js";
 
 userRouter.get("/User", ValidateToken, GetUserByUID);
-userRouter.get("/User/userName", ValidateUserName(), GetUserByUserName);
+userRouter.get(
+  "/User/userName/:UserName",
+  ValidateUserName(),
+  GetUserByUserName
+);
 userRouter.get("/User/Email", ValidateEmail(), GetUserByEmail);
 userRouter.post("/User", ValidateCreateUserRequest(), CreateUser);
 userRouter.patch("/User/Delete", ValidateUID(), DeleteUser);
