@@ -10,15 +10,15 @@ export async function getAllPosts(req, res) {
   try {
     let queryResult = [];
 
-    const { LastPostID, LastPostCreatedAt } = req.body;
-    const cacheKey = `${cacheTypes.getAllPost}${LastPostID}`;
+    const { LastPostID, LastPostCreatedAt } = req.query;
 
     if (LastPostID && LastPostCreatedAt) {
+      const lastPostCreatedAtDate = new Date(LastPostCreatedAt);
       queryResult = await PostModel.aggregate([
         {
           $match: {
-            createdAt: { $lte: LastPostCreatedAt },
-            _id: { $ne: LastPostID },
+            createdAt: { $lte: lastPostCreatedAtDate },
+            _id: { $ne: new mongoose.Types.ObjectId(LastPostID) },
           },
         },
         { $sort: { createdAt: -1 } },
@@ -216,7 +216,6 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
       },
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       ok: false,
       message:
