@@ -125,12 +125,16 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
     let queryResult = [];
 
     if (lastPostIdFollowing && lastPostCreatedAtFollowing) {
+      const lastPostCreatedAtFollowingDate = new Date(
+        lastPostCreatedAtFollowing
+      );
+
       queryResult = await PostModel.aggregate([
         {
           $match: {
             creatorUID: { $in: followedUsers.followed },
-            createdAt: { $lte: lastPostCreatedAtFollowing },
-            _id: { $ne: lastPostIdFollowing },
+            createdAt: { $lte: lastPostCreatedAtFollowingDate },
+            _id: { $ne: new mongoose.Types.ObjectId(lastPostIdFollowing) },
           },
         },
         { $sort: { createdAt: -1 } },
