@@ -9,8 +9,7 @@ import { Types } from "../Constants/index.js";
 export async function GetFollowedUsersIDByUID(userIUD) {
   try {
     if (!userIUD) throw new Error("UserIUD is invalid.");
-    const CacheKey = `${Types.GetFollowedUsersIDByUID}${userIUD}`;
-    const QueryResult = await UserModel.findById(userIUD, "followed").exec();
+    return await UserModel.findById(userIUD, "followed").exec();
   } catch (error) {
     return {
       ok: false,
