@@ -8,6 +8,13 @@ export const validatePost = () => {
   ];
 };
 
+export const ValidateGetPostsCreatedByUserName = () => {
+  return [
+    ValidateToken,
+    param("UserName").notEmpty().withMessage("Param UserName is empty in URL"),
+  ];
+};
+
 export const validateGetPostById = () => {
   return [
     ValidateToken,
