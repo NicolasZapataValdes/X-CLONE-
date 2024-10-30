@@ -206,7 +206,10 @@ export async function GetFollowersByUserName(request, response) {
       name: U.name,
       userName: U.userName,
       photo: U.photo,
-      AlreadyFollowUser: user.followed.includes(U._id.toString()),
+      AlreadyFollowUser:
+        request.user === U._id.toString()
+          ? true
+          : U.followers.includes(request.user),
     }));
 
     jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
@@ -316,6 +319,10 @@ export async function GetFollowedUsersByUserName(request, response) {
       name: U.name,
       userName: U.userName,
       photo: U.photo,
+      CurrentUserAlreadyFollowUser:
+        U._id.toString() === request.user
+          ? true
+          : U.followers.includes(request.user),
     }));
 
     jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
@@ -350,27 +357,30 @@ export async function GetUserByUserName(request, response) {
 
     const { UserName } = request.params;
 
-    const user = await UserModel.find({ userName: UserName }).exec();
-    if (!user || user.length === 0) throw new Error("User not found.");
+    const user = await UserModel.findOne({ userName: UserName }).exec();
+    if (!user) throw new Error("User not found.");
+    const CreatedAt = new Date(user.CreatedAt).toLocaleDateString();
 
-    const CreatedAt = new Date(user[0].CreatedAt).toLocaleDateString();
     response.status(200).json({
       ok: true,
       data: {
-        uid: user[0]._id,
-        Name: user[0].name,
-        Email: user[0].email,
-        userName: user[0].userName,
+        uid: user._id,
+        Name: user.name,
+        Email: user.email,
+        userName: user.userName,
         CreatedAt: CreatedAt,
-        LastLogIn: user[0].LastLogIn,
-        isActive: user[0].isActive,
-        photo: user[0].photo,
-        deleted: user[0].deleted,
-        followers: user[0].followers?.length,
-        followed: user[0].followed?.length,
+        LastLogIn: user.LastLogIn,
+        isActive: user.isActive,
+        photo: user.photo,
+        deleted: user.deleted,
+        followers: user.followers?.length,
+        followed: user.followed?.length,
+        CurrentUserFollowUser: user.followers.includes(request.user),
       },
     });
   } catch (error) {
+    console.error(error);
+
     response.status(500).json({
       ok: false,
       message: "An error ocurred while trying to get user by UserName",
