@@ -9,6 +9,7 @@ import {
   deletePostById,
   restorePostById,
   GetPostsCreatedByFollowingUsers,
+  GetPostsCreatedByUserName,
 } from "../Controllers/index.js";
 
 import {
@@ -17,6 +18,7 @@ import {
   validateDeletePostById,
   validateRestorePostById,
   validateGetPostById,
+  ValidateGetPostsCreatedByUserName,
 } from "../Validators/index.js";
 
 import { ValidateToken } from "../../Utils/Functions/index.js";
@@ -35,4 +37,9 @@ postRouter.patch(
   "/posts/restore/:id",
   validateRestorePostById(),
   restorePostById
+);
+postRouter.get(
+  "/posts/User/:UserName",
+  ValidateGetPostsCreatedByUserName(),
+  GetPostsCreatedByUserName
 );

@@ -350,30 +350,9 @@ export async function GetUserByUserName(request, response) {
 
     const { UserName } = request.params;
 
-    const CacheKey = `${Types.GetUserByUserName}${UserName}`;
-
-    // if (NodeCache.has(CacheKey)) {
-    //   const CachedData = NodeCache.get(CacheKey);
-    //   return response.status(200).json({
-    //     ok: true,
-    //     data: {
-    //       uid: CachedData[0].id,
-    //       Name: CachedData[0].name,
-    //       Email: CachedData[0].email,
-    //       userName: CachedData[0].userName,
-    //       CreatedAt: CachedData[0].CreatedAt,
-    //       LastLogIn: CachedData[0].LastLogIn,
-    //       isActive: CachedData[0].isActive,
-    //       photo: CachedData[0].photo,
-    //       deleted: CachedData[0].deleted,
-    //     },
-    //   });
-    // }
-
     const user = await UserModel.find({ userName: UserName }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
-    // NodeCache.set(CacheKey, user);
     const CreatedAt = new Date(user[0].CreatedAt).toLocaleDateString();
     response.status(200).json({
       ok: true,
