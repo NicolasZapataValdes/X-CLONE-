@@ -225,6 +225,161 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
   }
 }
 
+export async function GetPostsCreatedByUserName(req, res) {
+  try {
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+    }
+
+    const { lastPostId, lastPostCreatedAt, UserName } = req.params;
+
+    let queryResult = [];
+
+    if (lastPostId && lastPostCreatedAt) {
+      const lastPostCreatedAtDate = new Date(lastPostCreatedAt);
+
+      queryResult = await PostModel.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            let: { creatorUID: "$creatorUID" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$userName", UserName] },
+                      { $eq: [{ $toString: "$_id" }, "$$creatorUID"] },
+                    ],
+                  },
+                },
+              },
+              { $project: { _id: 1 } },
+            ],
+            as: "userMatch",
+          },
+        },
+        {
+          $match: {
+            userMatch: { $ne: [] },
+            createdAt: { $lte: lastPostCreatedAtDate },
+            _id: { $ne: new mongoose.Types.ObjectId(lastPostId) },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            let: { creatorUID: { $toObjectId: "$creatorUID" } },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+              { $project: { userName: 1, name: 1, photo: 1 } },
+            ],
+            as: "userInfo",
+          },
+        },
+        { $unwind: "$userInfo" },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            deleted: 1,
+            content: 1,
+            "userInfo.userName": 1,
+            "userInfo.name": 1,
+            "userInfo.photo": 1,
+          },
+        },
+      ]);
+    } else {
+      queryResult = await PostModel.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            let: { creatorUID: "$creatorUID" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$userName", UserName] },
+                      { $eq: [{ $toString: "$_id" }, "$$creatorUID"] },
+                    ],
+                  },
+                },
+              },
+              { $project: { _id: 1 } },
+            ],
+            as: "userMatch",
+          },
+        },
+        {
+          $match: {
+            userMatch: { $ne: [] },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            let: { creatorUID: { $toObjectId: "$creatorUID" } },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$creatorUID"] } } },
+              { $project: { userName: 1, name: 1, photo: 1 } },
+            ],
+            as: "userInfo",
+          },
+        },
+        { $unwind: "$userInfo" },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            deleted: 1,
+            content: 1,
+            "userInfo.userName": 1,
+            "userInfo.name": 1,
+            "userInfo.photo": 1,
+          },
+        },
+      ]);
+    }
+
+    return res.status(200).json({
+      ok: true,
+      length: queryResult.length,
+      posts: queryResult,
+      lastPostInfo: {
+        id:
+          queryResult.length > 0
+            ? queryResult[queryResult.length - 1]._id
+            : undefined,
+        createdDateTime:
+          queryResult.length > 0
+            ? queryResult[queryResult.length - 1].createdAt
+            : undefined,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      message:
+        "An error ocurred while trying to get posts created by followed users.",
+      errorDescription: error?.message,
+    });
+  }
+}
+
 export async function getPostById(req, res) {
   try {
     const result = validationResult(req);
