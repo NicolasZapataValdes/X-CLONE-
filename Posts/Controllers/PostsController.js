@@ -237,7 +237,8 @@ export async function GetPostsCreatedByUserName(req, res) {
       });
     }
 
-    const { lastPostId, lastPostCreatedAt, UserName } = req.params;
+    const { UserName } = req.params;
+    const { lastPostId, lastPostCreatedAt } = req.query;
 
     let queryResult = [];
 
