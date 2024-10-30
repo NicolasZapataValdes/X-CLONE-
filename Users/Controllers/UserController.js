@@ -206,7 +206,10 @@ export async function GetFollowersByUserName(request, response) {
       name: U.name,
       userName: U.userName,
       photo: U.photo,
-      AlreadyFollowUser: user.followed.includes(U._id.toString()),
+      AlreadyFollowUser:
+        request.user === U._id.toString()
+          ? true
+          : U.followers.includes(request.user),
     }));
 
     jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
