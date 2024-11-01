@@ -10,10 +10,10 @@ import {
   GetUserByUserName,
   FollowUser,
   Unfollow,
-  GetFollowedUsersByUid,
   UpdateUser,
   DeleteUser,
   RestoreUser,
+  GetFollowedUsersByUID,
   GetFollowedUsersIDByUID,
 } from "../Controllers/UserController.js";
 
@@ -38,7 +38,6 @@ describe("UserController.js", () => {
       expect(result.ok).toBe(false);
     });
   });
-
   describe("Unfollow User", () => {
     describe("When everything is ok", () => {
       test("should return ok true", async () => {
@@ -166,21 +165,20 @@ describe("UserController.js", () => {
   });
   describe("GetUserByUserName", () => {
     test("Should return a user by name", async () => {
-      const mockUser = [
-        {
-          id: "123",
-          name: "Pedro",
-          email: "pedro@gmail.com",
-          UserName: "Pedrito",
-          createdAt: "28/09/2024 14:57:35",
-          lastLogIn: "28/09/2024 14:57:35",
-          isActive: true,
-          photo: "https",
-          deleted: false,
-        },
-      ];
+      const mockUser = {
+        id: "123",
+        name: "Pedro",
+        email: "pedro@gmail.com",
+        UserName: "Pedrito",
+        createdAt: "28/09/2024 14:57:35",
+        lastLogIn: "28/09/2024 14:57:35",
+        isActive: true,
+        photo: "https",
+        deleted: false,
+        followers: [],
+      };
 
-      UserModel.find = jest.fn(() => ({
+      UserModel.findOne = jest.fn(() => ({
         exec: jest.fn().mockResolvedValue(mockUser),
       }));
 
@@ -199,7 +197,7 @@ describe("UserController.js", () => {
     });
 
     test("Should return an error", async () => {
-      UserModel.find = jest.fn(() => ({
+      UserModel.findOne = jest.fn(() => ({
         exec: jest.fn().mockRejectedValue(new Error("Something went wrong")),
       }));
 
@@ -376,7 +374,7 @@ describe("UserController.js", () => {
       const req = createRequest();
       const res = createResponse();
 
-      await GetFollowedUsersByUid(req, res);
+      await GetFollowedUsersByUID(req, res);
 
       expect(res.statusCode).toBe(500);
     });

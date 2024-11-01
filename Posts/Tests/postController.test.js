@@ -7,6 +7,7 @@ import {
   restorePostById,
   updatePostContent,
   GetPostsCreatedByFollowingUsers,
+  GetPostsCreatedByUserName,
 } from "../Controllers/index.js";
 import { PostModel } from "../Models/index.js";
 import { UserModel } from "../../Users/Models/index.js";
@@ -20,68 +21,51 @@ jest.mock("../../Users/Models");
 describe("PostsController.js", () => {
   describe("getAllPosts", () => {
     test("Should return all post", async () => {
-      const mockPost = {
-        createdAt: "28/09/2024 14:57:35",
-        updatedAt: "29/09/2024 14:57:35",
-        deleted: false,
-        creatorUID: "123",
-        content: "Some text",
-      };
+      const mockPost = [
+        {
+          createdAt: "28/09/2024 14:57:35",
+          updatedAt: "29/09/2024 14:57:35",
+          deleted: false,
+          creatorUID: "123",
+          content: "Some text",
+        },
+      ];
 
-      PostModel.find = jest.fn(() => ({
-        limit: jest.fn(() => ({
-          sort: jest.fn(() => ({
-            exec: jest.fn().mockResolvedValue(mockPost),
-          })),
-        })),
-      }));
+      PostModel.aggregate = jest.fn().mockResolvedValue(mockPost);
 
       const req = createRequest();
       const res = createResponse();
 
       await getAllPosts(req, res);
-
       expect(res.statusCode).toBe(200);
     });
 
     test("Should return all post when properties LastPostID and LastPostCreatedAt are not falsy", async () => {
-      const mockPost = {
-        createdAt: "28/09/2024 14:57:35",
-        updatedAt: "29/09/2024 14:57:35",
-        deleted: false,
-        creatorUID: "123",
-        content: "Some text",
-      };
+      const mockPost = [
+        {
+          createdAt: "28/09/2024 14:57:35",
+          updatedAt: "29/09/2024 14:57:35",
+          deleted: false,
+          creatorUID: "123",
+          content: "Some text",
+        },
+      ];
 
-      PostModel.find = jest.fn(() => ({
-        lte: jest.fn(() => ({
-          nor: jest.fn(() => ({
-            limit: jest.fn(() => ({
-              sort: jest.fn(() => ({
-                exec: jest.fn().mockResolvedValue(mockPost),
-              })),
-            })),
-          })),
-        })),
-      }));
+      PostModel.aggregate = jest.fn().mockResolvedValue(mockPost);
 
       const req = createRequest();
       const res = createResponse();
 
-      req.body.LastPostID = 1234;
-      req.body.LastPostCreatedAt = 1224;
-
+      req.query.LastPostID = 1234;
+      req.query.LastPostCreatedAt = 1224;
       await getAllPosts(req, res);
-
       expect(res.statusCode).toBe(200);
     });
 
     test("Should return an error", async () => {
-      PostModel.find = jest.fn(() => ({
-        limit: jest.fn(() => ({
-          exec: jest.fn().mockRejectedValue(new Error("Something went wrong")),
-        })),
-      }));
+      PostModel.aggregate = jest
+        .fn()
+        .mockRejectedValue(new Error("Something went wrong"));
 
       const req = createRequest();
       const res = createResponse();
@@ -94,21 +78,17 @@ describe("PostsController.js", () => {
 
   describe("Get Posts Created By Following Users", () => {
     test("should return all post", async () => {
-      const mockPost = {
-        createdAt: "28/09/2024 14:57:35",
-        updatedAt: "29/09/2024 14:57:35",
-        deleted: false,
-        creatorUID: "123",
-        content: "Some text",
-      };
+      const mockPost = [
+        {
+          createdAt: "28/09/2024 14:57:35",
+          updatedAt: "29/09/2024 14:57:35",
+          deleted: false,
+          creatorUID: "123",
+          content: "Some text",
+        },
+      ];
 
-      PostModel.find = jest.fn(() => ({
-        limit: jest.fn(() => ({
-          sort: jest.fn(() => ({
-            exec: jest.fn().mockResolvedValue(mockPost),
-          })),
-        })),
-      }));
+      PostModel.aggregate = jest.fn().mockResolvedValue(mockPost);
 
       UserModel.findById = jest.fn(() => ({
         exec: jest
@@ -121,7 +101,6 @@ describe("PostsController.js", () => {
 
       req.user = "1234";
       await GetPostsCreatedByFollowingUsers(req, res);
-
       expect(res.statusCode).toBe(200);
     });
 
@@ -163,13 +142,13 @@ describe("PostsController.js", () => {
 
     test("should return status 500 ", async () => {
       UserModel.findById = jest.fn(() => ({
-        exec: jest.fn().mockResolvedValue({ ok: false, followed: [] }),
+        exec: jest.fn().mockResolvedValue(undefined),
       }));
 
       const req = createRequest();
       const res = createResponse();
-
       req.user = "1234";
+
       await GetPostsCreatedByFollowingUsers(req, res);
 
       expect(res.statusCode).toBe(500);
@@ -184,17 +163,73 @@ describe("PostsController.js", () => {
     });
   });
 
+  describe("Get Posts Created By UserName", () => {
+    test("Should return all post", async () => {
+      const mockPost = [
+        {
+          createdAt: "28/09/2024 14:57:35",
+          updatedAt: "29/09/2024 14:57:35",
+          deleted: false,
+          creatorUID: "123",
+          content: "Some text",
+        },
+      ];
+
+      PostModel.aggregate = jest.fn().mockResolvedValue(mockPost);
+
+      const req = createRequest();
+      const res = createResponse();
+      req.params = "Jhon Doe";
+      await GetPostsCreatedByUserName(req, res);
+      expect(res.statusCode).toBe(200);
+    });
+
+    test("Should return all post when properties lastPostId and lastPostCreatedAt are not falsy", async () => {
+      const mockPost = [
+        {
+          createdAt: "28/09/2024 14:57:35",
+          updatedAt: "29/09/2024 14:57:35",
+          deleted: false,
+          creatorUID: "123",
+          content: "Some text",
+        },
+      ];
+
+      PostModel.aggregate = jest.fn().mockResolvedValue(mockPost);
+      const req = createRequest();
+      const res = createResponse();
+      req.params = "Jhon Doe";
+      req.query.lastPostID = "1234";
+      req.query.lastPostCreatedAt = "2024-07-10T04:20:51.000+00:00";
+      await GetPostsCreatedByUserName(req, res);
+      expect(res.statusCode).toBe(200);
+    });
+
+    test("Should return an error", async () => {
+      PostModel.aggregate = jest
+        .fn()
+        .mockRejectedValue(new Error("Something went wrong"));
+
+      const req = createRequest();
+      const res = createResponse();
+
+      await GetPostsCreatedByUserName(req, res);
+
+      expect(res.statusCode).toBe(500);
+    });
+  });
+
   describe("getPostById", () => {
     test("Should return a post by id", async () => {
-      const mockPost = {
-        id: "123",
-        title: "Test Post",
-        content: "This is a test post content",
-      };
+      const mockPost = [
+        {
+          id: "123",
+          title: "Test Post",
+          content: "This is a test post content",
+        },
+      ];
 
-      PostModel.findById = jest.fn(() => ({
-        exec: jest.fn().mockResolvedValue(mockPost),
-      }));
+      PostModel.aggregate = jest.fn().mockResolvedValue(mockPost);
 
       const req = createRequest();
       const res = createResponse();
@@ -213,9 +248,7 @@ describe("PostsController.js", () => {
     });
 
     test("Should return 404 when post not found", async () => {
-      PostModel.findById = jest.fn(() => ({
-        exec: jest.fn().mockResolvedValue(undefined),
-      }));
+      PostModel.aggregate = jest.fn().mockResolvedValue(undefined);
 
       const req = createRequest();
       const res = createResponse();
@@ -226,9 +259,9 @@ describe("PostsController.js", () => {
     });
 
     test("Should return an error", async () => {
-      PostModel.findById = jest.fn(() => ({
-        exec: jest.fn().mockRejectedValue(new Error("Something went wrong")),
-      }));
+      PostModel.aggregate = jest
+        .fn()
+        .mockRejectedValue(new Error("Something went wrong"));
 
       const req = createRequest();
       const res = createResponse();

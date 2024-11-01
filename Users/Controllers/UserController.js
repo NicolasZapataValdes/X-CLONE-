@@ -131,19 +131,6 @@ export async function GetFollowersByUid(request, response) {
       return;
     }
 
-    // const CacheKey = `${Types.GetFollowersByUid}${request.user}`;
-
-    // if (NodeCache.has(CacheKey)) {
-    //   const CachedData = NodeCache.get(CacheKey);
-    //   return response.status(200).json({
-    //     ok: true,
-    //     data: {
-    //       followers: CachedData,
-    //       lenght: CachedData.length,
-    //     },
-    //   });
-    // }
-
     const user = await UserModel.find({ _id: request.user }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
@@ -160,7 +147,6 @@ export async function GetFollowersByUid(request, response) {
     }));
 
     jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
-    // NodeCache.set(CacheKey, jsonResponse);
     response.status(200).json({
       ok: true,
       data: {
