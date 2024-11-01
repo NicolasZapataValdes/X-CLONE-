@@ -395,16 +395,6 @@ export async function getPostById(req, res) {
 
     const { id } = req.params;
 
-    const cacheKey = `${cacheTypes.getPostById}${id}`;
-
-    if (NodeCache.has(cacheKey)) {
-      const cachedData = NodeCache.get(cacheKey);
-      return res.status(200).json({
-        ok: true,
-        data: cachedData,
-      });
-    }
-
     const post = await PostModel.aggregate([
       {
         $match: {
@@ -446,8 +436,6 @@ export async function getPostById(req, res) {
     }
 
     const data = post[0];
-
-    NodeCache.set(cacheKey, data);
 
     res.status(200).json({
       ok: true,
