@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import {
   GenerateAccessToken,
   getParsedCurrentDateTime,
+  EncryptPassWord,
 } from "../../Utils/Functions/index.js";
 import { UserModel } from "../Models/index.js";
 import { Types } from "../Constants/index.js";
@@ -522,7 +523,7 @@ export async function CreateUser(request, response) {
       name: Name,
       userName: UserName,
       email: Email,
-      passWord: PassWord,
+      passWord: EncryptPassWord(PassWord),
       CreatedAt: getParsedCurrentDateTime(),
       LastLogIn: getParsedCurrentDateTime(),
       isActive: true,
@@ -564,7 +565,7 @@ export async function UpdateUser(request, response) {
       { _id: uid },
       {
         name: Name,
-        passWord: PassWord,
+        passWord: EncryptPassWord(PassWord),
         descripción: Description,
         photo: Photo,
       }
