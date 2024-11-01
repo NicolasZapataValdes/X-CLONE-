@@ -5,12 +5,12 @@ import {
   updatePostContent,
   deletePostById,
   restorePostById,
+  GetPostsCreatedByFollowingUsers,
 } from "./Posts/Docs/PostRouterDocs.js";
 import {
   LogInUserNameAndPassWord,
   LogInWithEmailAndPassWord,
-  LogOutWithEmailAndPassWord,
-  LogOutWithUserNameAndPassWord,
+  LogOut,
 } from "./LogIn/Docs/index.js";
 import {
   CreateUser,
@@ -60,6 +60,9 @@ const swaggerOptions = {
         get: getPostById,
         patch: updatePostContent,
       },
+      "/api/v1/posts/following": {
+        get: GetPostsCreatedByFollowingUsers,
+      },
       "/api/v1/posts/": {
         post: createPost,
       },
@@ -71,11 +74,12 @@ const swaggerOptions = {
       },
       "/api/v1/Auth/Session/Email": {
         post: LogInWithEmailAndPassWord,
-        delete: LogOutWithEmailAndPassWord,
       },
       "/api/v1/Auth/Session/UserName": {
         post: LogInUserNameAndPassWord,
-        delete: LogOutWithUserNameAndPassWord,
+      },
+      "api/v1/Auth/Session": {
+        delete: LogOut,
       },
       "/api/v1/User": {
         post: CreateUser,
@@ -87,16 +91,16 @@ const swaggerOptions = {
       "/api/v1/User/Restore": {
         patch: RestoreUser,
       },
-      "/api/v1/User/UserName": {
+      "/api/v1/User/UserName/:UserName": {
         get: GetUserByUserName,
       },
       "/api/v1/User/Email": {
         get: GetUserByEmail,
       },
-      "/api/v1/User/Followers": {
+      "/api/v1/User/Followers/:UserName": {
         get: GetFollowersByUid,
       },
-      "/api/v1/User/Followed": {
+      "/api/v1/User/Followed/:UserName": {
         get: GetFollowedUsersByUid,
       },
       "/api/v1/User/Follow": {
@@ -104,6 +108,9 @@ const swaggerOptions = {
       },
       "/api/v1/User/UnFollow": {
         post: UnFollowUser,
+      },
+      "/api/v1/User/User": {
+        get: GetFollowersByUid,
       },
     },
   },

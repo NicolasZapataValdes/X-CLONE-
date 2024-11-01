@@ -179,9 +179,10 @@ export const LogInUserNameAndPassWord = {
     },
   },
 };
-export const LogOutWithEmailAndPassWord = {
+export const LogOut = {
   tags: ["LogIn"],
-  description: "This Endpoint allows you to logOut with email and password",
+  description:
+    "This Endpoint allows you to logOut using the provided AccessToken in headers.",
   responses: {
     200: {
       description: "User loggedOut",
@@ -203,8 +204,8 @@ export const LogOutWithEmailAndPassWord = {
         },
       },
     },
-    400: {
-      description: "Bad Request",
+    401: {
+      description: "Unauthorized",
       content: {
         "application/json": {
           schema: {
@@ -216,30 +217,7 @@ export const LogOutWithEmailAndPassWord = {
               },
               message: {
                 type: "string",
-                example: "Request don't pass validations.",
-              },
-              errorDescription: {
-                type: "Array",
-                example: [
-                  {
-                    type: "field",
-                    msg: "Param Email is obligatory.",
-                    path: "email",
-                    location: "body",
-                  },
-                  {
-                    type: "field",
-                    msg: "Param email is not a valid Email.",
-                    path: "email",
-                    location: "body",
-                  },
-                  {
-                    type: "field",
-                    msg: "Param PassWord is empty.",
-                    path: "passWord",
-                    location: "body",
-                  },
-                ],
+                example: "Access Token in headers is empty.",
               },
             },
           },
@@ -259,95 +237,7 @@ export const LogOutWithEmailAndPassWord = {
               },
               message: {
                 type: "string",
-                example: "Error while trying to LogOut With Email and Password",
-              },
-              errorDescription: {
-                type: "string",
-                example: "An error description",
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-};
-export const LogOutWithUserNameAndPassWord = {
-  tags: ["LogIn"],
-  description: "This Endpoint allows you to logOut with user name and password",
-  responses: {
-    200: {
-      description: "User loggedOut",
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              ok: {
-                type: "boolean",
-                example: true,
-              },
-              message: {
-                type: "string",
-                example: "User loggedOut succesfully",
-              },
-            },
-          },
-        },
-      },
-    },
-    400: {
-      description: "Bad Request",
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              ok: {
-                type: "boolean",
-                example: false,
-              },
-              message: {
-                type: "string",
-                example: "Request don't pass validations.",
-              },
-              errorDescription: {
-                type: "Array",
-                example: [
-                  {
-                    type: "field",
-                    msg: "Param UserName is obligatory.",
-                    path: "UserName",
-                    location: "body",
-                  },
-                  {
-                    type: "field",
-                    msg: "Param PassWord is empty.",
-                    path: "passWord",
-                    location: "body",
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    },
-    500: {
-      description: "Internal Server Error",
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              ok: {
-                type: "boolean",
-                example: false,
-              },
-              message: {
-                type: "string",
-                example:
-                  "Error while trying to LogOut With UserName and Password",
+                example: "Error while trying to LogOut.",
               },
               errorDescription: {
                 type: "string",
