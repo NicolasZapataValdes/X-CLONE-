@@ -2,8 +2,6 @@ import { validationResult } from "express-validator";
 import { PostModel } from "../Models/index.js";
 import { getParsedCurrentDateTime } from "../../Utils/Functions/Functions.js";
 import { GetFollowedUsersIDByUID } from "../../Users/Controllers/index.js";
-import { NodeCache } from "../../app.js";
-import { cacheTypes } from "../Constants/index.js";
 import mongoose from "mongoose";
 
 export async function getAllPosts(req, res) {
@@ -117,6 +115,7 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
       });
     }
     const followedUsers = await GetFollowedUsersIDByUID(req.user);
+
     if (!followedUsers)
       throw new Error("An error ocurred while trying to get Followed Users.");
 
@@ -216,6 +215,8 @@ export async function GetPostsCreatedByFollowingUsers(req, res) {
       },
     });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       ok: false,
       message:
@@ -239,7 +240,6 @@ export async function GetPostsCreatedByUserName(req, res) {
 
     const { UserName } = req.params;
     const { lastPostId, lastPostCreatedAt } = req.query;
-
     let queryResult = [];
 
     if (lastPostId && lastPostCreatedAt) {
@@ -372,6 +372,8 @@ export async function GetPostsCreatedByUserName(req, res) {
       },
     });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       ok: false,
       message:
