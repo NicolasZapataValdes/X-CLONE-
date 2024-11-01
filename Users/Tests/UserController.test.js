@@ -10,19 +10,38 @@ import {
   GetUserByUserName,
   FollowUser,
   Unfollow,
-  GetFollowedUsersByUid,
   UpdateUser,
   DeleteUser,
   RestoreUser,
+  GetFollowedUsersByUID,
+  GetFollowedUsersIDByUID,
 } from "../Controllers/UserController.js";
 
 jest.mock("../../Users/Models/UserModel.js");
 
 describe("UserController.js", () => {
+  describe("Get Followed UsersID By UID", () => {
+    test("should return followed list array", async () => {
+      UserModel.findById = jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue({ followed: ["1234", "4567"] }),
+      }));
+
+      const result = await GetFollowedUsersIDByUID(123);
+      expect(result.followed).toEqual(["1234", "4567"]);
+    });
+    test("should return ok false", async () => {
+      UserModel.findById = jest.fn(() => ({
+        exec: jest.fn().mockRejectedValue(new Error("something went wrong.")),
+      }));
+
+      const result = await GetFollowedUsersIDByUID(123);
+      expect(result.ok).toBe(false);
+    });
+  });
   describe("Unfollow User", () => {
     describe("When everything is ok", () => {
       test("should return ok true", async () => {
-        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+        UserModel.bulkWrite = jest.fn().mockResolvedValue({ modifiedCount: 2 });
 
         const request = createRequest();
         const response = createResponse();
@@ -35,7 +54,7 @@ describe("UserController.js", () => {
     });
     describe("When Follower not found", () => {
       test("should return ok false", async () => {
-        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 0 });
+        UserModel.bulkWrite = jest.fn().mockResolvedValue({ modifiedCount: 0 });
         const request = createRequest();
         const response = createResponse();
 
@@ -69,7 +88,7 @@ describe("UserController.js", () => {
     });
     describe("When something went wrong.", () => {
       test("should return ok false and error description", async () => {
-        UserModel.updateOne = jest
+        UserModel.bulkWrite = jest
           .fn()
           .mockRejectedValue(new Error("Something went wrong."));
 
@@ -86,7 +105,7 @@ describe("UserController.js", () => {
   describe("Follow User", () => {
     describe("When everything is ok", () => {
       test("should return ok true", async () => {
-        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 1 });
+        UserModel.bulkWrite = jest.fn().mockResolvedValue({ modifiedCount: 2 });
 
         const request = createRequest();
         const response = createResponse();
@@ -104,6 +123,7 @@ describe("UserController.js", () => {
         });
 
         expect(response.ok).toBe(false);
+        expect(response.statusCode).toBe(401);
       });
     });
     describe("When followedUID is invalid", () => {
@@ -117,7 +137,7 @@ describe("UserController.js", () => {
     });
     describe("When something went wrong.", () => {
       test("should return ok false and error description", async () => {
-        UserModel.updateOne = jest
+        UserModel.bulkWrite = jest
           .fn()
           .mockRejectedValue(new Error("Something went wrong."));
 
@@ -132,7 +152,7 @@ describe("UserController.js", () => {
     });
     describe("When Follower not found", () => {
       test("should return ok false", async () => {
-        UserModel.updateOne = jest.fn().mockResolvedValue({ matchedCount: 0 });
+        UserModel.bulkWrite = jest.fn().mockResolvedValue({ modifiedCount: 0 });
         const request = createRequest();
         const response = createResponse();
 
@@ -145,21 +165,20 @@ describe("UserController.js", () => {
   });
   describe("GetUserByUserName", () => {
     test("Should return a user by name", async () => {
-      const mockUser = [
-        {
-          id: "123",
-          name: "Pedro",
-          email: "pedro@gmail.com",
-          UserName: "Pedrito",
-          createdAt: "28/09/2024 14:57:35",
-          lastLogIn: "28/09/2024 14:57:35",
-          isActive: true,
-          photo: "https",
-          deleted: false,
-        },
-      ];
+      const mockUser = {
+        id: "123",
+        name: "Pedro",
+        email: "pedro@gmail.com",
+        UserName: "Pedrito",
+        createdAt: "28/09/2024 14:57:35",
+        lastLogIn: "28/09/2024 14:57:35",
+        isActive: true,
+        photo: "https",
+        deleted: false,
+        followers: [],
+      };
 
-      UserModel.find = jest.fn(() => ({
+      UserModel.findOne = jest.fn(() => ({
         exec: jest.fn().mockResolvedValue(mockUser),
       }));
 
@@ -178,7 +197,7 @@ describe("UserController.js", () => {
     });
 
     test("Should return an error", async () => {
-      UserModel.find = jest.fn(() => ({
+      UserModel.findOne = jest.fn(() => ({
         exec: jest.fn().mockRejectedValue(new Error("Something went wrong")),
       }));
 
@@ -355,7 +374,7 @@ describe("UserController.js", () => {
       const req = createRequest();
       const res = createResponse();
 
-      await GetFollowedUsersByUid(req, res);
+      await GetFollowedUsersByUID(req, res);
 
       expect(res.statusCode).toBe(500);
     });

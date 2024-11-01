@@ -1,4 +1,4 @@
-import express from 'express';
+import express from "express";
 export const userRouter = express.Router();
 
 import {
@@ -7,8 +7,9 @@ import {
   ValidateCreateUserRequest,
   ValidateUID,
   ValidateUpdateUserRequest,
-  ValidateFollowerUIDAndFollowedUID,
-} from '../Validators/index.js';
+  ValidateFollowedUID,
+  ValidateFollowerUID,
+} from "../Validators/index.js";
 
 import {
   GetUserByUserName,
@@ -17,27 +18,34 @@ import {
   DeleteUser,
   RestoreUser,
   UpdateUser,
-  GetFollowersByUid,
-  GetFollowedUsersByUid,
+  GetFollowersByUserName,
+  GetFollowedUsersByUserName,
   FollowUser,
   Unfollow,
-} from '../Controllers/index.js';
+  GetUserByUID,
+} from "../Controllers/index.js";
+import { ValidateToken } from "../../Utils/Functions/Functions.js";
 
-userRouter.get('/User/userName', ValidateUserName(), GetUserByUserName);
-userRouter.get('/User/Email', ValidateEmail(), GetUserByEmail);
-userRouter.post('/User', ValidateCreateUserRequest(), CreateUser);
-userRouter.patch('/User/Delete', ValidateUID(), DeleteUser);
-userRouter.patch('/User/Restore', ValidateUID(), RestoreUser);
-userRouter.patch('/User', ValidateUpdateUserRequest(), UpdateUser);
-userRouter.get('/User/Followers', ValidateUID(), GetFollowersByUid);
-userRouter.get('/User/Followed', ValidateUID(), GetFollowedUsersByUid);
-userRouter.post(
-  '/User/Follow',
-  ValidateFollowerUIDAndFollowedUID(),
-  FollowUser
+userRouter.get("/User", ValidateToken, GetUserByUID);
+userRouter.get(
+  "/User/userName/:UserName",
+  ValidateUserName(),
+  GetUserByUserName
 );
-userRouter.post(
-  '/User/UnFollow',
-  ValidateFollowerUIDAndFollowedUID(),
-  Unfollow
+userRouter.get("/User/Email", ValidateEmail(), GetUserByEmail);
+userRouter.post("/User", ValidateCreateUserRequest(), CreateUser);
+userRouter.patch("/User/Delete", ValidateUID(), DeleteUser);
+userRouter.patch("/User/Restore", ValidateUID(), RestoreUser);
+userRouter.patch("/User", ValidateUpdateUserRequest(), UpdateUser);
+userRouter.get(
+  "/User/Followers/:UserName",
+  ValidateToken,
+  GetFollowersByUserName
 );
+userRouter.get(
+  "/User/Followed/:UserName",
+  ValidateToken,
+  GetFollowedUsersByUserName
+);
+userRouter.post("/User/Follow", ValidateFollowedUID(), FollowUser);
+userRouter.post("/User/UnFollow", ValidateFollowedUID(), Unfollow);

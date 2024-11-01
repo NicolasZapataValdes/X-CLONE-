@@ -1,6 +1,23 @@
 import { validationResult } from "express-validator";
-import { getParsedCurrentDateTime } from "../../Utils/Functions/index.js";
+import {
+  GenerateAccessToken,
+  getParsedCurrentDateTime,
+  EncryptPassWord,
+} from "../../Utils/Functions/index.js";
 import { UserModel } from "../Models/index.js";
+
+export async function GetFollowedUsersIDByUID(userIUD) {
+  try {
+    if (!userIUD) throw new Error("UserIUD is invalid.");
+    return await UserModel.findById(userIUD, "followed").exec();
+  } catch (error) {
+    return {
+      ok: false,
+      message: "An error ocurred while trying to get followed array.",
+      errorDescription: error?.message,
+    };
+  }
+}
 
 export async function Unfollow(request, response) {
   try {
@@ -16,27 +33,28 @@ export async function Unfollow(request, response) {
       return;
     }
 
-    const { followerUid, followedUid } = request.body;
+    const { followedUid } = request.body;
+    const followerUid = request.user;
 
-    const followerQueryResult = await UserModel.updateOne(
-      { _id: followerUid },
+    const bulkOperations = [
       {
-        $pull: { followed: followedUid },
-      }
-    );
-
-    if (followerQueryResult.matchedCount === 0)
-      throw new Error("Follower not found.");
-
-    const followedQueryResult = await UserModel.updateOne(
-      { _id: followedUid },
+        updateOne: {
+          filter: { _id: followerUid },
+          update: { $pull: { followed: followedUid } },
+        },
+      },
       {
-        $pull: { followers: followerUid },
-      }
-    );
+        updateOne: {
+          filter: { _id: followedUid },
+          update: { $pull: { followers: followerUid } },
+        },
+      },
+    ];
 
-    if (followedQueryResult.matchedCount === 0)
-      throw new Error("Followed not found.");
+    const BulkQueryResult = await UserModel.bulkWrite(bulkOperations);
+
+    if (BulkQueryResult.modifiedCount <= 0)
+      throw new Error("Bulk query cannot be executed.");
 
     response.status(200).json({
       ok: true,
@@ -64,27 +82,28 @@ export async function FollowUser(request, response) {
       return;
     }
 
-    const { followerUid, followedUid } = request.body;
+    const { followedUid } = request.body;
+    const followerUid = request.user;
 
-    const followerQueryResult = await UserModel.updateOne(
-      { _id: followerUid },
+    const bulkOperations = [
       {
-        $push: { followed: followedUid },
-      }
-    );
-
-    if (followerQueryResult.matchedCount === 0)
-      throw new Error("Follower not found.");
-
-    const followedQueryResult = await UserModel.updateOne(
-      { _id: followedUid },
+        updateOne: {
+          filter: { _id: followerUid },
+          update: { $push: { followed: followedUid } },
+        },
+      },
       {
-        $push: { followers: followerUid },
-      }
-    );
+        updateOne: {
+          filter: { _id: followedUid },
+          update: { $push: { followers: followerUid } },
+        },
+      },
+    ];
 
-    if (followedQueryResult.matchedCount === 0)
-      throw new Error("Followed not found.");
+    const queryResult = await UserModel.bulkWrite(bulkOperations);
+
+    if (queryResult.modifiedCount <= 0)
+      throw new Error("Bulk query cannot be executed.");
 
     response.status(200).json({
       ok: true,
@@ -112,9 +131,7 @@ export async function GetFollowersByUid(request, response) {
       return;
     }
 
-    const { uid } = request.body;
-
-    const user = await UserModel.find({ _id: uid }).exec();
+    const user = await UserModel.find({ _id: request.user }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
     const followerUsers = await UserModel.find({
@@ -126,8 +143,10 @@ export async function GetFollowersByUid(request, response) {
       name: U.name,
       userName: U.userName,
       photo: U.photo,
+      AlreadyFollowUser: user[0].followed.includes(U._id.toString()),
     }));
 
+    jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
     response.status(200).json({
       ok: true,
       data: {
@@ -136,6 +155,7 @@ export async function GetFollowersByUid(request, response) {
       },
     });
   } catch (error) {
+    console.error(error);
     response.status(500).json({
       ok: false,
       message: "An error ocurred while trying to get followers",
@@ -144,7 +164,7 @@ export async function GetFollowersByUid(request, response) {
   }
 }
 
-export async function GetFollowedUsersByUid(request, response) {
+export async function GetFollowersByUserName(request, response) {
   try {
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -157,9 +177,59 @@ export async function GetFollowedUsersByUid(request, response) {
       return;
     }
 
-    const { uid } = request.body;
+    const { UserName } = request.params;
 
-    const user = await UserModel.find({ _id: uid }).exec();
+    const user = await UserModel.findOne({ userName: UserName }).exec();
+
+    if (!user || user.length === 0) throw new Error("User not found.");
+
+    const followerUsers = await UserModel.find({
+      _id: { $in: user.followers },
+    });
+
+    const jsonResponse = followerUsers.map((U) => ({
+      uid: U._id,
+      name: U.name,
+      userName: U.userName,
+      photo: U.photo,
+      AlreadyFollowUser:
+        request.user === U._id.toString()
+          ? true
+          : U.followers.includes(request.user),
+    }));
+
+    jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
+    response.status(200).json({
+      ok: true,
+      data: {
+        followers: jsonResponse,
+        lenght: jsonResponse.length,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followers",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export async function GetFollowedUsersByUID(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const user = await UserModel.find({ _id: request.user }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
     const followedUsers = await UserModel.find({
@@ -173,6 +243,61 @@ export async function GetFollowedUsersByUid(request, response) {
       photo: U.photo,
     }));
 
+    jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
+    response.status(200).json({
+      ok: true,
+      data: {
+        followed: jsonResponse,
+        lenght: jsonResponse.length,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get followed users",
+      errorDescription: error?.message,
+    });
+  }
+}
+
+export async function GetFollowedUsersByUserName(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const { UserName } = request.params;
+
+    const user = await UserModel.findOne(
+      { userName: UserName },
+      "followed"
+    ).exec();
+
+    if (!user || user.length === 0) throw new Error("User not found.");
+
+    const followedUsers = await UserModel.find({
+      _id: { $in: user.followed },
+    });
+
+    const jsonResponse = followedUsers.map((U) => ({
+      uid: U._id,
+      name: U.name,
+      userName: U.userName,
+      photo: U.photo,
+      CurrentUserAlreadyFollowUser:
+        U._id.toString() === request.user
+          ? true
+          : U.followers.includes(request.user),
+    }));
+
+    jsonResponse.sort((a, b) => a.name.localeCompare(b.name));
     response.status(200).json({
       ok: true,
       data: {
@@ -202,25 +327,32 @@ export async function GetUserByUserName(request, response) {
       return;
     }
 
-    const { UserName } = request.body;
-    const user = await UserModel.find({ userName: UserName }).exec();
-    if (!user || user.length === 0) throw new Error("User not found.");
+    const { UserName } = request.params;
+
+    const user = await UserModel.findOne({ userName: UserName }).exec();
+    if (!user) throw new Error("User not found.");
+    const CreatedAt = new Date(user.CreatedAt).toLocaleDateString();
 
     response.status(200).json({
       ok: true,
       data: {
-        uid: user[0].id,
-        Name: user[0].name,
-        Email: user[0].email,
-        userName: user[0].userName,
-        CreatedAt: user[0].CreatedAt,
-        LastLogIn: user[0].LastLogIn,
-        isActive: user[0].isActive,
-        photo: user[0].photo,
-        deleted: user[0].deleted,
+        uid: user._id,
+        Name: user.name,
+        Email: user.email,
+        userName: user.userName,
+        CreatedAt: CreatedAt,
+        LastLogIn: user.LastLogIn,
+        isActive: user.isActive,
+        photo: user.photo,
+        deleted: user.deleted,
+        followers: user.followers?.length,
+        followed: user.followed?.length,
+        CurrentUserFollowUser: user.followers.includes(request.user),
       },
     });
   } catch (error) {
+    console.error(error);
+
     response.status(500).json({
       ok: false,
       message: "An error ocurred while trying to get user by UserName",
@@ -243,6 +375,7 @@ export async function GetUserByEmail(request, response) {
     }
 
     const { Email } = request.body;
+
     const user = await UserModel.find({ email: Email }).exec();
     if (!user || user.length === 0) throw new Error("User not found.");
 
@@ -269,6 +402,48 @@ export async function GetUserByEmail(request, response) {
   }
 }
 
+export async function GetUserByUID(request, response) {
+  try {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      response.status(400).json({
+        ok: false,
+        message: "Request don't pass validations.",
+        errorDescription: result.array(),
+      });
+
+      return;
+    }
+
+    const user = await UserModel.findOne({ _id: request.user }).exec();
+    if (!user) throw new Error("User not found.");
+
+    const CreatedAt = new Date(user.CreatedAt).toLocaleDateString();
+    response.status(200).json({
+      ok: true,
+      data: {
+        uid: user._id,
+        Name: user.name,
+        Email: user.email,
+        userName: user.userName,
+        CreatedAt: CreatedAt,
+        LastLogIn: user.LastLogIn,
+        isActive: user.isActive,
+        photo: user.photo,
+        deleted: user.deleted,
+        followers: user.followers?.length,
+        followed: user.followed?.length,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      message: "An error ocurred while trying to get user by ID",
+      errorDescription: error?.message,
+    });
+  }
+}
+
 export async function CreateUser(request, response) {
   try {
     const result = validationResult(request);
@@ -289,7 +464,7 @@ export async function CreateUser(request, response) {
       name: Name,
       userName: UserName,
       email: Email,
-      passWord: PassWord,
+      passWord: EncryptPassWord(PassWord),
       CreatedAt: getParsedCurrentDateTime(),
       LastLogIn: getParsedCurrentDateTime(),
       isActive: true,
@@ -302,6 +477,7 @@ export async function CreateUser(request, response) {
     response.status(201).json({
       ok: true,
       message: "User created successfully.",
+      AccessToken: GenerateAccessToken(User._id.toString()),
     });
   } catch (error) {
     response.status(500).json({
@@ -330,7 +506,7 @@ export async function UpdateUser(request, response) {
       { _id: uid },
       {
         name: Name,
-        passWord: PassWord,
+        passWord: EncryptPassWord(PassWord),
         descripción: Description,
         photo: Photo,
       }
