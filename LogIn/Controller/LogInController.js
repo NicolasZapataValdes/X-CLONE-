@@ -1,6 +1,9 @@
 import { UserModel } from "../../Users/Models/index.js";
 import { validationResult } from "express-validator";
-import { GenerateAccessToken } from "../../Utils/Functions/index.js";
+import {
+  GenerateAccessToken,
+  EncryptPassWord,
+} from "../../Utils/Functions/index.js";
 
 export async function LogInWithEmailAndPassWord(request, response) {
   try {
@@ -16,9 +19,10 @@ export async function LogInWithEmailAndPassWord(request, response) {
     }
 
     const { email, passWord } = request.body;
+    const EncryptedPassword = EncryptPassWord(passWord);
 
     const UpdateResult = await UserModel.findOneAndUpdate(
-      { email: email, passWord: passWord },
+      { email: email, passWord: EncryptedPassword },
       { $set: { isActive: true } }
     ).exec();
 
@@ -33,6 +37,8 @@ export async function LogInWithEmailAndPassWord(request, response) {
       UserName: UpdateResult.userName,
     });
   } catch (error) {
+    console.error(error);
+
     response.status(500).json({
       ok: false,
       message: "Error while trying to LogIn With Email and Password",
@@ -55,9 +61,10 @@ export async function LogInWithUserNameAndPassWord(request, response) {
     }
 
     const { UserName, passWord } = request.body;
+    const EncryptedPassword = EncryptPassWord(passWord);
 
     const UpdateResult = await UserModel.findOneAndUpdate(
-      { userName: UserName, passWord: passWord },
+      { userName: UserName, passWord: EncryptedPassword },
       { $set: { isActive: true } }
     ).exec();
 
@@ -72,6 +79,8 @@ export async function LogInWithUserNameAndPassWord(request, response) {
       UserName: UpdateResult.userName,
     });
   } catch (error) {
+    console.error(error);
+
     response.status(500).json({
       ok: false,
       message: "Error while trying to LogIn With UserName and Password",
