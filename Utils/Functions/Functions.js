@@ -1,7 +1,38 @@
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import crypto from "node:crypto";
+import { log } from "node:console";
 dotenv.config();
+
+export function EncryptPassWord(PassWord) {
+  const InitialVector = Buffer.from(process.env.CryptoInitalVector, "hex");
+  const cipher = crypto.createCipheriv(
+    "aes-256-cbc",
+    Buffer.from(process.env.ClusterSecretKet),
+    InitialVector
+  );
+
+  let encrypted = cipher.update(PassWord, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  return InitialVector.toString("hex") + ":" + encrypted;
+}
+
+function DecryptPassword(EncryptedPassword) {
+  const parts = EncryptedPassword.split(":");
+  const InitialVector = Buffer.from(parts.shift(), "hex");
+  const EncryptPassword = Buffer.from(parts.join(":"), "hex");
+
+  const decipher = crypto.createDecipheriv(
+    "aes-256-cbc",
+    Buffer.from(process.env.ClusterSecretKet),
+    InitialVector
+  );
+
+  let decrypted = decipher.update(EncryptPassword, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+
+  return decrypted;
+}
 
 function EncryptJWTToken(Token) {
   const InitialVector = crypto.randomBytes(16);
